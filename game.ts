@@ -931,14 +931,60 @@ class PhysicsGame {
         this.canvas.addEventListener('mousemove', (event) => {
             const rect = this.canvas.getBoundingClientRect();
             const scaleX = this.canvas.width / rect.width;
+            const scaleY = this.canvas.height / rect.height;
 
             let mouseX = (event.clientX - rect.left) * scaleX;
-
+            
+            // Ensure the mouse position stays within the canvas bounds
             mouseX = Math.max(this.BALL_RADIUS, Math.min(this.CANVAS_WIDTH - this.BALL_RADIUS, mouseX));
 
             this.spawnPosition.x = mouseX;
         });
 
+        // Add touch event for mobile devices
+        this.canvas.addEventListener('touchmove', (event: TouchEvent) => {
+            event.preventDefault(); // Prevent scrolling when touching the canvas
+            
+            // TypeScript doesn't understand that we've checked the length, so we explicitly check again
+            const touch = event.touches[0];
+            if (touch) {
+                const rect = this.canvas.getBoundingClientRect();
+                const scaleX = this.canvas.width / rect.width;
+                const scaleY = this.canvas.height / rect.height;
+                
+                let touchX = (touch.clientX - rect.left) * scaleX;
+                
+                // Ensure the touch position stays within the canvas bounds
+                touchX = Math.max(this.BALL_RADIUS, Math.min(this.CANVAS_WIDTH - this.BALL_RADIUS, touchX));
+                
+                this.spawnPosition.x = touchX;
+            }
+        }, { passive: false });
+
+        // Add touchend event for mobile clicks
+        this.canvas.addEventListener('touchend', (event: TouchEvent) => {
+            event.preventDefault(); // Prevent default behavior
+            
+            // Handle the same logic as click event
+            if (this.levelCompleteTimer > 0) {
+                this.levelCompleteTimer = 0;
+                return;
+            }
+
+            // If game is over, restart the game on touch
+            if (this.gameOver) {
+                this.restartGame();
+                return;
+            }
+
+            // Toggle spawn state on touch
+            this.spawnActive = !this.spawnActive;
+            if (this.spawnActive) {
+                this.nextSpawnTime = Date.now();
+            }
+        }, { passive: false });
+        
+        // Restore the click event handler for desktop
         this.canvas.addEventListener('click', (event) => {
             if (this.levelCompleteTimer > 0) {
                 this.levelCompleteTimer = 0;
