@@ -1,0 +1,14 @@
+{
+  "scripts": {
+    "start": "bun ./index.html --open",
+    "build": "bun build ./index.html --outdir=dist"
+  },
+  "dependencies": {
+    "matter-js": "^0.20.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20.10.4",
+    "bun-types": "latest",
+    "@types/matter-js": "^0.19.8"
+  }
+}
