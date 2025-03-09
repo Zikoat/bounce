@@ -30,9 +30,10 @@ jobs:
           bun-version: latest
       - uses: actions/checkout@v4
       - run: bun install --production
-      - run: mkdir -p dist
       - run: bun build ./game.ts --outdir=./dist
       - uses: actions/configure-pages@v5
+        with:
+          enablement: true
       - uses: actions/upload-pages-artifact@v3
         with:
           path: "./dist"
