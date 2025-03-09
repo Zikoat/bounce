@@ -63,7 +63,7 @@ class Block {
                 render: {
                     fillStyle: this.getFillStyle()
                 }
-            });
+            });''
             this.body.label = 'block';
         } else if (type === BlockType.Diagonal) {
             this.diagonalDirection = Math.random() < 0.5 ? 'leftToRight' : 'rightToLeft';
@@ -1237,8 +1237,6 @@ class PhysicsGame {
             // Add completion info to the message
             if (allBallsCollected) {
                 this.levelCompleteMessage += "\nPerfect! All balls collected!";
-            } else {
-                this.levelCompleteMessage += "\nSome balls were left behind";
             }
             
             this.levelCompleteTimer = this.LEVEL_COMPLETE_MESSAGE_DURATION;
