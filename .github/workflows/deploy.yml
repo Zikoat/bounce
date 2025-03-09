@@ -30,7 +30,7 @@ jobs:
           bun-version: latest
       - uses: actions/checkout@v4
       - run: bun install --production
-      - run: bun build ./game.ts --outdir=./dist
+      - run: bun build ./index.html --outdir=./dist
       - uses: actions/configure-pages@v5
       - uses: actions/upload-pages-artifact@v3
         with:
