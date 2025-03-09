@@ -8,7 +8,8 @@ enum BlockType {
     Multiply,
     Remove,
     Diagonal,
-    Plus
+    Plus,
+    Chevron
 }
 
 class Block {
@@ -57,7 +58,9 @@ class Block {
             max: { x: x + width / 2, y: y + height / 2 }
         };
 
-        if (type !== BlockType.Multiply && type !== BlockType.Remove && type !== BlockType.Diagonal && type !== BlockType.Plus) {
+        if (type !== BlockType.Multiply && type !== BlockType.Remove && 
+            type !== BlockType.Diagonal && type !== BlockType.Plus && 
+            type !== BlockType.Chevron) {
             this.body = Bodies.rectangle(x, y, width, height, {
                 isStatic: true,
                 render: {
@@ -82,6 +85,7 @@ class Block {
             case BlockType.Plus:
                 return 'transparent';
             case BlockType.Diagonal:
+            case BlockType.Chevron:
                 return '#f1c40f';
             default:
                 return 'transparent';
@@ -466,6 +470,10 @@ class PhysicsGame {
                 if (block.type === BlockType.Diagonal) {
                     this.createDiagonalWall(block, laneIndex, blockIndex);
                 }
+                
+                if (block.type === BlockType.Chevron) {
+                    this.createChevronWall(block, laneIndex, blockIndex);
+                }
             }
         }
     }
@@ -491,79 +499,201 @@ class PhysicsGame {
     }
 
     private generateRandomBlockLayout(): BlockType[][] {
-        const layout: BlockType[][] = Array.from(
-            { length: this.LANE_COUNT },
-            () => Array(this.BLOCK_COUNT).fill(BlockType.Empty)
-        );
+        // Create an array filled with empty blocks
+        const layout: BlockType[][] = [];
+        
+        // Initialize with Empty blocks
+        for (let laneIndex = 0; laneIndex < this.LANE_COUNT; laneIndex++) {
+            layout[laneIndex] = [];
+            for (let blockIndex = 0; blockIndex < this.BLOCK_COUNT; blockIndex++) {
+                const lane = layout[laneIndex];
+                if (!lane) {
+                    throw new Error(`Lane ${laneIndex} is undefined`);
+                }
+                lane[blockIndex] = BlockType.Empty;
+            }
+        }
 
         const blockTypeWeights: Record<BlockType, number> = {
             [BlockType.Empty]: Math.max(10 - this.currentLevel, 5),
             [BlockType.Multiply]: Math.min(6 + Math.floor(this.currentLevel / 2), 12),
             [BlockType.Remove]: Math.min(5 + Math.floor(this.currentLevel / 3), 9),
             [BlockType.Diagonal]: Math.min(6 + Math.floor(this.currentLevel), 12),
-            [BlockType.Plus]: Math.min(5 + Math.floor(this.currentLevel / 2), 10)
+            [BlockType.Plus]: Math.min(5 + Math.floor(this.currentLevel / 2), 10),
+            [BlockType.Chevron]: Math.min(4 + Math.floor(this.currentLevel / 2), 8)
         };
 
+        // First pass: generate random blocks
         for (let laneIndex = 0; laneIndex < this.LANE_COUNT; laneIndex++) {
-            if (!layout[laneIndex]) {
-                throw new Error(`Lane ${laneIndex} is undefined in layout`);
+            const lane = layout[laneIndex];
+            if (!lane) {
+                throw new Error(`Lane ${laneIndex} is undefined in first pass`);
             }
-
+            
             for (let blockIndex = 0; blockIndex < this.BLOCK_COUNT; blockIndex++) {
+                // Skip the first row
                 if (blockIndex === 0) {
                     continue;
                 }
-                const lane = layout[laneIndex];
-                if (!lane) {
-                    throw new Error(`Lane ${laneIndex} is unexpectedly undefined`);
-                }
-
-                if (lane[blockIndex] === undefined) {
-                    throw new Error(`Block position [${laneIndex}][${blockIndex}] is undefined in layout`);
-                }
-
-
+                
                 lane[blockIndex] = this.getRandomBlockType(blockTypeWeights);
-
+            }
+        }
+        
+        // Second pass: resolve conflicts
+        for (let laneIndex = 0; laneIndex < this.LANE_COUNT; laneIndex++) {
+            const lane = layout[laneIndex];
+            if (!lane) {
+                throw new Error(`Lane ${laneIndex} is undefined in second pass`);
+            }
+            
+            for (let blockIndex = 0; blockIndex < this.BLOCK_COUNT; blockIndex++) {
+                // Skip the first row
+                if (blockIndex === 0) continue;
+                
+                // Handle Multiply blocks
                 if (lane[blockIndex] === BlockType.Multiply) {
+                    // Don't place Multiply blocks above each other
                     if (blockIndex > 0) {
                         const blockAbove = lane[blockIndex - 1];
                         if (blockAbove === undefined) {
-                            throw new Error(`Block above [${laneIndex}][${blockIndex - 1}] is undefined`);
+                            throw new Error(`Block at [${laneIndex}][${blockIndex - 1}] is undefined`);
                         }
                         if (blockAbove === BlockType.Multiply) {
                             lane[blockIndex] = BlockType.Empty;
+                            continue;
                         }
                     }
-
+                    
+                    // Don't place Multiply blocks next to each other horizontally
                     if (laneIndex > 0) {
                         const leftLane = layout[laneIndex - 1];
                         if (!leftLane) {
-                            throw new Error(`Left lane ${laneIndex - 1} is undefined`);
+                            throw new Error(`Lane ${laneIndex - 1} is undefined`);
                         }
-
+                        
                         const blockToLeft = leftLane[blockIndex];
                         if (blockToLeft === undefined) {
-                            throw new Error(`Block to left [${laneIndex - 1}][${blockIndex}] is undefined`);
+                            throw new Error(`Block at [${laneIndex - 1}][${blockIndex}] is undefined`);
                         }
-
+                        
                         if (blockToLeft === BlockType.Multiply) {
                             lane[blockIndex] = BlockType.Empty;
+                            continue;
                         }
                     }
                 }
-
+                
+                // Handle Diagonal blocks
                 if (lane[blockIndex] === BlockType.Diagonal) {
-                    // Don't put diagonal blocks in the first or last lane
+                    // Don't place diagonal blocks in the first or last lane
                     if (laneIndex === 0 || laneIndex === this.LANE_COUNT - 1) {
                         lane[blockIndex] = BlockType.Empty;
-                    } 
-                    // Check for adjacent diagonal block to the left
-                    else if (laneIndex > 0) {
+                        continue;
+                    }
+                    
+                    // Don't place adjacent diagonal blocks
+                    if (laneIndex > 0) {
                         const leftLane = layout[laneIndex - 1];
-                        if (leftLane && leftLane[blockIndex] === BlockType.Diagonal) {
-                            // Don't allow adjacent diagonals - convert to empty
+                        if (!leftLane) {
+                            throw new Error(`Lane ${laneIndex - 1} is undefined when checking diagonals`);
+                        }
+                        
+                        const blockToLeft = leftLane[blockIndex];
+                        if (blockToLeft === undefined) {
+                            throw new Error(`Block at [${laneIndex - 1}][${blockIndex}] is undefined when checking diagonals`);
+                        }
+                        
+                        if (blockToLeft === BlockType.Diagonal) {
                             lane[blockIndex] = BlockType.Empty;
+                            continue;
+                        }
+                    }
+                }
+                
+                // Handle Chevron blocks
+                if (lane[blockIndex] === BlockType.Chevron) {
+                    // Don't place chevron blocks in the first or last lane
+                    if (laneIndex === 0 || laneIndex === this.LANE_COUNT - 1) {
+                        lane[blockIndex] = BlockType.Empty;
+                        continue;
+                    }
+                    
+                    // Don't place chevrons next to each other
+                    let hasAdjacentChevron = false;
+                    
+                    // Check left
+                    if (laneIndex > 0) {
+                        const leftLane = layout[laneIndex - 1];
+                        if (!leftLane) {
+                            throw new Error(`Lane ${laneIndex - 1} is undefined when checking for adjacent chevrons`);
+                        }
+                        
+                        const blockToLeft = leftLane[blockIndex];
+                        if (blockToLeft === undefined) {
+                            throw new Error(`Block at [${laneIndex - 1}][${blockIndex}] is undefined when checking for adjacent chevrons`);
+                        }
+                        
+                        if (blockToLeft === BlockType.Chevron) {
+                            hasAdjacentChevron = true;
+                        }
+                    }
+                    
+                    // Check right
+                    if (laneIndex < this.LANE_COUNT - 1) {
+                        const rightLane = layout[laneIndex + 1];
+                        if (!rightLane) {
+                            throw new Error(`Lane ${laneIndex + 1} is undefined when checking for adjacent chevrons`);
+                        }
+                        
+                        const blockToRight = rightLane[blockIndex];
+                        if (blockToRight === undefined) {
+                            throw new Error(`Block at [${laneIndex + 1}][${blockIndex}] is undefined when checking for adjacent chevrons`);
+                        }
+                        
+                        if (blockToRight === BlockType.Chevron) {
+                            hasAdjacentChevron = true;
+                        }
+                    }
+                    
+                    if (hasAdjacentChevron) {
+                        lane[blockIndex] = BlockType.Empty;
+                        continue;
+                    }
+                    
+                    // Don't place a diagonal to the right of a chevron which goes from top right to bottom left
+                    if (laneIndex < this.LANE_COUNT - 1) {
+                        const rightLane = layout[laneIndex + 1];
+                        if (!rightLane) {
+                            throw new Error(`Lane ${laneIndex + 1} is undefined when checking right of chevron`);
+                        }
+                        
+                        const blockToRight = rightLane[blockIndex];
+                        if (blockToRight === undefined) {
+                            throw new Error(`Block at [${laneIndex + 1}][${blockIndex}] is undefined when checking right of chevron`);
+                        }
+                        
+                        if (blockToRight === BlockType.Diagonal) {
+                            // We'll set the diagonal direction in the next pass, but here we'll just prevent the combination
+                            rightLane[blockIndex] = BlockType.Empty;
+                        }
+                    }
+                    
+                    // Don't place a diagonal block to the left of a chevron which goes from top left to bottom right
+                    if (laneIndex > 0) {
+                        const leftLane = layout[laneIndex - 1];
+                        if (!leftLane) {
+                            throw new Error(`Lane ${laneIndex - 1} is undefined when checking left of chevron`);
+                        }
+                        
+                        const blockToLeft = leftLane[blockIndex];
+                        if (blockToLeft === undefined) {
+                            throw new Error(`Block at [${laneIndex - 1}][${blockIndex}] is undefined when checking left of chevron`);
+                        }
+                        
+                        if (blockToLeft === BlockType.Diagonal) {
+                            // Same as above, prevent the combination
+                            leftLane[blockIndex] = BlockType.Empty;
                         }
                     }
                 }
@@ -572,6 +702,7 @@ class PhysicsGame {
 
         return layout;
     }
+
     private getRandomBlockType(weights: Record<BlockType, number>): BlockType {
         let totalWeight = 0;
         for (const type in weights) {
@@ -1117,6 +1248,7 @@ class PhysicsGame {
             for (const block of laneArray) {
                 block.drawRibbon(ctx);
                 this.drawDiagonalForBlock(block, ctx);
+                this.drawChevronForBlock(block, ctx);
             }
         }
 
@@ -1564,6 +1696,154 @@ class PhysicsGame {
         
         // Start a new game at level 1
         this.startNextLevel();
+    }
+
+    private createChevronWall(block: Block, laneIndex: number, blockIndex: number) {
+        if (block.diagonalWall) {
+            return;
+        }
+
+        // For chevron blocks, we don't need direction but for consistency with diagonal blocks
+        // we'll set a default value
+        block.diagonalDirection = 'leftToRight'; // Direction doesn't matter for chevrons
+
+        if (!block.bounds ||
+            typeof block.bounds.min?.x !== 'number' ||
+            typeof block.bounds.min?.y !== 'number' ||
+            typeof block.bounds.max?.x !== 'number' ||
+            typeof block.bounds.max?.y !== 'number') {
+            throw Error("Block bounds not properly defined");
+        }
+
+        const minX = block.bounds.min.x;
+        const minY = block.bounds.min.y;
+        const maxX = block.bounds.max.x;
+        const maxY = block.bounds.max.y;
+        const centerX = (minX + maxX) / 2;
+        const centerY = (minY + maxY) / 2;
+        const width = maxX - minX;
+        const height = maxY - minY;
+
+        // Calculate points for the chevron (^) shape
+        // Lower the peak point to make the chevron less steep - move from 30% to 50% from the top
+        const peakY = minY + height * 0.5; // Peak is at 50% from the top (middle of the block)
+        const leftBaseX = minX;
+        const rightBaseX = maxX;
+        const baseY = maxY;
+
+        // Thickness for both arms
+        const thickness = this.WALL_THICKNESS * 1.5;
+        
+        // Calculate chevron left side - using proper perpendicular calculation for a 45-degree rectangle
+        const leftDiagonalLength = Math.sqrt(Math.pow(centerX - leftBaseX, 2) + Math.pow(peakY - baseY, 2));
+        const leftDiagonalAngle = Math.atan2(peakY - baseY, centerX - leftBaseX);
+        
+        // Calculate perpendicular vectors to create proper rectangle
+        const perpAngle = leftDiagonalAngle + Math.PI/2; // 90 degrees (perpendicular) to diagonal
+        const perpDx = (thickness / 2) * Math.cos(perpAngle);
+        const perpDy = (thickness / 2) * Math.sin(perpAngle);
+        
+        // Create corners of the left arm as a proper rotated rectangle
+        const leftVertices = [
+            { x: leftBaseX + perpDx, y: baseY + perpDy }, // Bottom left corner
+            { x: leftBaseX - perpDx, y: baseY - perpDy }, // Bottom right corner
+            { x: centerX - perpDx, y: peakY - perpDy },   // Top right corner
+            { x: centerX + perpDx, y: peakY + perpDy }    // Top left corner
+        ];
+
+        // Calculate chevron right side - using similar approach
+        const rightDiagonalLength = Math.sqrt(Math.pow(rightBaseX - centerX, 2) + Math.pow(baseY - peakY, 2));
+        const rightDiagonalAngle = Math.atan2(baseY - peakY, rightBaseX - centerX);
+        
+        // Perpendicular vectors for right arm
+        const rightPerpAngle = rightDiagonalAngle + Math.PI/2;
+        const rightPerpDx = (thickness / 2) * Math.cos(rightPerpAngle);
+        const rightPerpDy = (thickness / 2) * Math.sin(rightPerpAngle);
+        
+        // Create corners of the right arm as a proper rotated rectangle
+        const rightVertices = [
+            { x: centerX + rightPerpDx, y: peakY + rightPerpDy },   // Bottom left corner
+            { x: centerX - rightPerpDx, y: peakY - rightPerpDy },   // Bottom right corner
+            { x: rightBaseX - rightPerpDx, y: baseY - rightPerpDy }, // Top right corner
+            { x: rightBaseX + rightPerpDx, y: baseY + rightPerpDy }  // Top left corner
+        ];
+
+        // Remove walls on both sides
+        this.removeWallSegment(laneIndex, blockIndex);
+        if (laneIndex > 0) {
+            this.removeWallSegment(laneIndex, blockIndex);
+        }
+        if (laneIndex < this.LANE_COUNT - 1) {
+            this.removeWallSegment(laneIndex + 1, blockIndex);
+        }
+
+        // Create left side of chevron
+        const leftDiagonalBody = Bodies.fromVertices(
+            (leftBaseX + centerX) / 2, (baseY + peakY) / 2,
+            [leftVertices],
+            {
+                isStatic: true,
+                render: {
+                    fillStyle: '#95a5a6'
+                }
+            }
+        );
+
+        // Create right side of chevron
+        const rightDiagonalBody = Bodies.fromVertices(
+            (rightBaseX + centerX) / 2, (baseY + peakY) / 2,
+            [rightVertices],
+            {
+                isStatic: true,
+                render: {
+                    fillStyle: '#95a5a6'
+                }
+            }
+        );
+
+        leftDiagonalBody.label = 'chevronWallLeft';
+        rightDiagonalBody.label = 'chevronWallRight';
+        
+        // Store only one as the block's diagonalWall for consistency with diagonal blocks
+        block.diagonalWall = leftDiagonalBody;
+
+        World.add(this.engine.world, [leftDiagonalBody, rightDiagonalBody]);
+    }
+
+    private drawChevronForBlock(block: Block, ctx: CanvasRenderingContext2D) {
+        if (block.type !== BlockType.Chevron || !block.bounds) {
+            return;
+        }
+
+        const minX = block.bounds.min.x;
+        const minY = block.bounds.min.y;
+        const maxX = block.bounds.max.x;
+        const maxY = block.bounds.max.y;
+        const centerX = (minX + maxX) / 2;
+        const peakY = minY + (maxY - minY) * 0.5; // Peak is at 50% from the top (middle of the block)
+
+        if (!block.diagonalWall) {
+            ctx.save();
+            ctx.strokeStyle = '#95a5a6';
+            
+            // Use consistent thickness for both sides
+            const thickness = this.DIAGONAL_THICKNESS * 1.5;
+            ctx.lineWidth = thickness;
+            
+            // Draw both sides of the chevron
+            ctx.beginPath();
+            
+            // Left arm
+            ctx.moveTo(minX, maxY);
+            ctx.lineTo(centerX, peakY);
+            
+            // Right arm
+            ctx.moveTo(centerX, peakY);
+            ctx.lineTo(maxX, maxY);
+            
+            ctx.stroke();
+            ctx.restore();
+        }
     }
 }
 
