@@ -11,6 +11,7 @@ permissions:
   contents: read
   pages: write
   id-token: write
+  actions: read  # Required for deploy-pages@v4
 
 # Allow one concurrent deployment
 concurrency:
@@ -33,9 +34,9 @@ jobs:
       - run: bun build ./game.ts --outdir=./dist
       - run: cp index.html styles.css ./dist
       - run: sed -i 's/game.ts/game.js/g' ./dist/index.html
-      - uses: actions/configure-pages@v4
-      - uses: actions/upload-pages-artifact@v1
+      - uses: actions/configure-pages@v5
+      - uses: actions/upload-pages-artifact@v3
         with:
           path: "./dist"
-      - uses: actions/deploy-pages@v1
+      - uses: actions/deploy-pages@v4
         id: deployment 
