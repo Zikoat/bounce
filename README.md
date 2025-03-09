@@ -20,25 +20,16 @@ A fun physics-based ball game built with TypeScript, Matter.js and Bun.
 
 ## Setup
 
-### Prerequisites
-
-- [Bun](https://bun.sh/) - A fast JavaScript runtime and toolkit
-
-### Installation
-
+1. Install [Bun](https://bun.sh/)
 1. Clone the repository
-2. Install dependencies
+1. Install dependencies
    ```
    bun install
    ```
-
-## Development
-
-To run the game:
-
-```
-bun start
-```
+1. To run the game:
+   ```
+   bun start
+   ```
 
 This will start a development server and open the game in your browser.
 
