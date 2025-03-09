@@ -22,6 +22,7 @@ class Block {
     public hitAnimTimer: number = 0;
     public diagonalWall: Matter.Body | null = null;
     public diagonalDirection: 'leftToRight' | 'rightToLeft' | null = null;
+    public secondaryDiagonalWall: Matter.Body | null = null;
 
     constructor(x: number, y: number, width: number, height: number, type: BlockType = BlockType.Empty, multiplyValue: number = 0) {
         this.type = type;
@@ -492,6 +493,9 @@ class PhysicsGame {
                 }
                 if (block.diagonalWall) {
                     World.remove(this.engine.world, block.diagonalWall);
+                }
+                if (block.secondaryDiagonalWall) {
+                    World.remove(this.engine.world, block.secondaryDiagonalWall);
                 }
             }
         }
@@ -1253,6 +1257,11 @@ class PhysicsGame {
         }
 
         this.drawUI(ctx);
+        
+        // Periodically check for and clean up any stray chevron arms
+        if (Math.random() < 0.05) { // Only check occasionally (5% chance per frame) to save performance
+            this.cleanupStrayChevronArms();
+        }
 
         requestAnimationFrame(this.gameLoop);
     }
@@ -1699,8 +1708,15 @@ class PhysicsGame {
     }
 
     private createChevronWall(block: Block, laneIndex: number, blockIndex: number) {
+        // First, make sure we clean up any existing walls to prevent duplicates
         if (block.diagonalWall) {
-            return;
+            World.remove(this.engine.world, block.diagonalWall);
+            block.diagonalWall = null;
+        }
+        
+        if (block.secondaryDiagonalWall) {
+            World.remove(this.engine.world, block.secondaryDiagonalWall);
+            block.secondaryDiagonalWall = null;
         }
 
         // For chevron blocks, we don't need direction but for consistency with diagonal blocks
@@ -1801,12 +1817,15 @@ class PhysicsGame {
             }
         );
 
-        leftDiagonalBody.label = 'chevronWallLeft';
-        rightDiagonalBody.label = 'chevronWallRight';
+        // Store unique labels for both arms to identify them
+        leftDiagonalBody.label = 'chevronWallLeft_' + laneIndex + '_' + blockIndex;
+        rightDiagonalBody.label = 'chevronWallRight_' + laneIndex + '_' + blockIndex;
         
-        // Store only one as the block's diagonalWall for consistency with diagonal blocks
+        // Store both bodies in the block for proper tracking and cleanup
         block.diagonalWall = leftDiagonalBody;
+        block.secondaryDiagonalWall = rightDiagonalBody;
 
+        // Add both arms to the world
         World.add(this.engine.world, [leftDiagonalBody, rightDiagonalBody]);
     }
 
@@ -1843,6 +1862,44 @@ class PhysicsGame {
             
             ctx.stroke();
             ctx.restore();
+        }
+    }
+
+    // Method to find and clean up any stray chevron arms
+    private cleanupStrayChevronArms(): void {
+        // Get all bodies in the world
+        const allBodies = Matter.Composite.allBodies(this.engine.world);
+        
+        // Track which chevron arms are actually attached to blocks
+        const validChevronArmIds = new Set<number>();
+        
+        // First, collect all valid chevron arm IDs from our blocks
+        for (const laneArray of this.blocks) {
+            if (!laneArray) continue;
+            
+            for (const block of laneArray) {
+                if (!block) continue;
+                
+                if (block.type === BlockType.Chevron) {
+                    if (block.diagonalWall) {
+                        validChevronArmIds.add(block.diagonalWall.id);
+                    }
+                    if (block.secondaryDiagonalWall) {
+                        validChevronArmIds.add(block.secondaryDiagonalWall.id);
+                    }
+                }
+            }
+        }
+        
+        // Then find and remove any chevron arms that aren't in our valid set
+        for (const body of allBodies) {
+            if (body.label && 
+                (body.label.startsWith('chevronWallLeft_') || body.label.startsWith('chevronWallRight_')) && 
+                !validChevronArmIds.has(body.id)) {
+                // This is a stray chevron arm, remove it
+                World.remove(this.engine.world, body);
+                console.log("Removed stray chevron arm:", body.label);
+            }
         }
     }
 }

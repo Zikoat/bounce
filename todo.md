@@ -67,4 +67,5 @@ sub-goals:
     * [ ] when balls spawn at the top, add an initial downwards velocity when they spawn so they  faster clear each other and dont spread out. could also spawn the next ball in a spot which isn't already used. 
     * [ ] add a bar which says how many balls there are left to spawn
 * [ ] more gameplay:
-    * [ ] after a level you can buy keys and chests
+    * [ ] after a level you can buy keys and chests, and these allow you to unlock more block types.
+    * [ ] you can create a "deck" of upgrades based on the cards you have. a card has both a positive and a negative effect, which is randomly added. 
