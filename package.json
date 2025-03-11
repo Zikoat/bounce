@@ -1,10 +1,17 @@
 {
+  "name": "bounce",
   "scripts": {
     "start": "bun ./index.html --open",
-    "build": "bun build ./index.html --outdir=dist"
+    "build": "bun build ./index.html --outdir=dist",
+    "res:build": "rescript",
+    "res:clean": "rescript clean",
+    "res:dev": "rescript -w"
   },
   "dependencies": {
-    "matter-js": "^0.20.0"
+    "@rescript/core": "1.6.1",
+    "matter-js": "^0.20.0",
+    "rescript": "11.1.4",
+    "typescript": "^5.8.2"
   },
   "devDependencies": {
     "@types/node": "^20.10.4",

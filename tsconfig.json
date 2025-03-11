@@ -1,6 +1,5 @@
 {
   "compilerOptions": {
-    
     "lib": [
       "ESNext",
       "DOM"
@@ -10,7 +9,6 @@
     "moduleDetection": "force",
     "jsx": "react-jsx",
     "allowJs": true,
-    
     "moduleResolution": "bundler",
     "allowImportingTsExtensions": true,
     "verbatimModuleSyntax": true,
@@ -31,5 +29,6 @@
     "isolatedModules": true,
     "checkJs": true,
     "esModuleInterop": true,
+    "erasableSyntaxOnly": true,
   }
 }
