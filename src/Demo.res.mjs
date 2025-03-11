@@ -5,6 +5,7 @@ console.log("Hello, world!");
 
 import * as Matter from 'matter-js';
 const { Engine, Render, World, Bodies, Body, Runner } = Matter;
+
 class Block {
     body = null;
     type;
@@ -1477,10 +1478,11 @@ class PhysicsGame {
         }
     }
 }
-window.onload = () => {
-    new PhysicsGame();
-};
 ;
+
+window.onload = (function () {
+    new PhysicsGame();
+  });
 
 export {
   

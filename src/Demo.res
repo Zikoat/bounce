@@ -1,8 +1,15 @@
 Console.log("Hello, world!")
+// todo: rename file
+// todo remove package json build scripts for bun
+// todo enable all warnings
+// todo create unit tests for level generation
+// todo create unit tests for physics engine
+// todo create frontend rendering tests
 
 %%raw(`
 import * as Matter from 'matter-js';
 const { Engine, Render, World, Bodies, Body, Runner } = Matter;
+
 class Block {
     body = null;
     type;
@@ -1474,9 +1481,12 @@ class PhysicsGame {
             }
         }
     }
+}`)
+
+@new external physicsGame: unit => unit = "PhysicsGame"
+@val external window: 'a = "window"
+
+window["onload"] = () => {
+  physicsGame()
 }
-window.onload = () => {
-    new PhysicsGame();
-};
- 
-`)
+
