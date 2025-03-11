@@ -42,20 +42,20 @@ sub-goals:
     * [x] multiply powerups can go up to 5, the amount is random
     * [ ] wide blocks, which span multiple blocks horizontally
     * [x] multiply powerups with random values (2, 3, 4, or 5)
-    * [ ] 0.5 blocks, which only let a few of the balls pass through, and despawn others. despawns 1 every x, or passes through 1 every x, so the multiplier should say this. 
+    * [ ] 0.5 blocks, which only let a few of the balls pass through, and despawn others. despawns 1 every x, or passes through 1 every x, so the multiplier should say this. Of 10 balls, destray either 1 (0.9), 2 (0.8), 5 (0.5), 8(0.2) or 9(0.1). but it should interleave this, so either destroy 1 every 2, destroy 1 every 5, destroy 1 every 10, or pass 1 every 5 or pass 1 every 10.
     * [ ] the same above, but with different multipliers
     * [ ] keys and locked blocks, where you need to take the key to open the locked block.
     * [ ] diagonals that span multiple horizontal blocks
-    * [ ] walls can either be there or not
+    * [x] walls can either be there or not
     * [ ] portals, where a ball which passes through, is teleported to the other block
-    * [ ] random blocks, where you don't know what they do before you pass through them, and then revealing a different type of block
+    * [ ] hidden random blocks, where you don't know what they do before you pass through them, and then revealing a different type of block
     * [ ] an "upgrade" block where you can increase the multiplier of another block, or delete a negative block.
     * [x] a "plus" block, where when you hit it, it gets removed and then it spawns x new balls.
     * [ ] wide blocks, where a block spans multiple horizontal lengths
     * [ ] "bounce" blocks, where a block bounces all the way back up to the top
     * [ ] "virus" blocks which infect a single ball and then the block is removed. that infected ball infect other balls it touches for more than 1 second, and when an infected ball has been alive for more than 10 seconds it dies.
     * [ ] "fire" blocks, than when you pick it up it will create a "fire upgrade" ball, if you collect that "fire upgrade" ball, it will make the first ball in the next level a "fire" ball, and that ball will despawn the first block it touches.
-    * [ ] ^ blocks, which work the same as diagonals, but instead of going all the way diagonal, it is 2 small diagonals that meet in the middle, such that it will split the balls in 2 paths. in the same way as diagonals it should remove the walls on the left and right.
+    * [x] ^ blocks, which work the same as diagonals, but instead of going all the way diagonal, it is 2 small diagonals that meet in the middle, such that it will split the balls in 2 paths. in the same way as diagonals it should remove the walls on the left and right.
     * [ ] black hole, which is basically a remove block with infinite count. it destroys all balls which touch it.
     * [ ] big ball, where there is 1 big ball which acts like all the other balls. it should be big enough to pass through diagonals.
     * [ ] we could put a "limit" on the amount of balls you can create, and as such all extra balls are turned into "spirits" which are only score but cannot be spawned in the next level. then we can create a block which increases the maximum count of balls you can have.
