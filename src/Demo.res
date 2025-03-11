@@ -75,80 +75,61 @@ class Block {
         }
     }
     getFillStyle() {
-        switch (this.type) {
-            case "Multiply":
-            case "Remove":
-            case "Plus":
-                return 'transparent';
-            case "Diagonal":
-            case "Chevron":
-                return '#f1c40f';
-            default:
-                return 'transparent';
-        }
+        return getFillStyle(this.type);
     }
-    drawRibbon(ctx) {
-        const ribbonHeight = (this.bounds.max.y - this.bounds.min.y) / 3;
-        const ribbonY = (this.bounds.max.y + this.bounds.min.y) / 2 - ribbonHeight / 2;
-        const ribbonWidth = this.bounds.max.x - this.bounds.min.x;
-        const centerX = (this.bounds.min.x + this.bounds.max.x) / 2;
-        if (this.type === "Multiply") {
+    drawRibbon2(ctx, bounds, type, value, hitAnimTimer, counter) {
+        const ribbonHeight = (bounds.max.y - bounds.min.y) / 3;
+        const ribbonY = (bounds.max.y + bounds.min.y) / 2 - ribbonHeight / 2;
+        const ribbonWidth = bounds.max.x - bounds.min.x;
+        const centerX = (bounds.min.x + bounds.max.x) / 2;
+        if (type === "Multiply") {
             ctx.save();
             ctx.fillStyle = 'rgba(39, 174, 96, 0.3)';
-            ctx.fillRect(this.bounds.min.x, ribbonY, ribbonWidth, ribbonHeight);
+            ctx.fillRect(bounds.min.x, ribbonY, ribbonWidth, ribbonHeight);
             ctx.fillStyle = '#27ae60';
             ctx.font = 'bold 20px Arial';
             ctx.textAlign = 'center';
             ctx.textBaseline = 'middle';
-            ctx.fillText("x" + this.value, centerX, ribbonY + ribbonHeight / 2);
+            ctx.fillText("x" + value, centerX, ribbonY + ribbonHeight / 2);
             ctx.restore();
         }
-        else if (this.type === "Plus") {
+        else if (type === "Plus") {
             ctx.save();
             // Green-yellowish hue for Plus blocks
             ctx.fillStyle = 'rgba(160, 200, 60, 0.3)';
-            ctx.fillRect(this.bounds.min.x, ribbonY, ribbonWidth, ribbonHeight);
+            ctx.fillRect(bounds.min.x, ribbonY, ribbonWidth, ribbonHeight);
             ctx.fillStyle = '#9ACD32'; // Yellow-green for Plus effect
             ctx.font = 'bold 20px Arial';
             ctx.textAlign = 'center';
             ctx.textBaseline = 'middle';
-            ctx.fillText("+" + this.value, centerX, ribbonY + ribbonHeight / 2);
+            ctx.fillText("+" + value, centerX, ribbonY + ribbonHeight / 2);
             ctx.restore();
         }
-        else if (this.type === "Remove") {
-            if (this.hitAnimTimer === undefined) {
+        else if (type === "Remove") {
+            if (hitAnimTimer === undefined) {
                 this.hitAnimTimer = 0;
             }
             ctx.save();
             ctx.fillStyle = 'rgba(231, 76, 60, 0.3)';
-            ctx.fillRect(this.bounds.min.x, ribbonY, ribbonWidth, ribbonHeight);
+            ctx.fillRect(bounds.min.x, ribbonY, ribbonWidth, ribbonHeight);
             let pulseScale = 1.0;
             let textColor = '#c0392b';
-            if (this.hitAnimTimer > 0) {
-                pulseScale = 0.9 + (0.1 * (1 - this.hitAnimTimer / 10));
-                const yellowFactor = this.hitAnimTimer / 10;
-                textColor = this.blendColors('#f1c40f', '#c0392b', yellowFactor);
+            if (hitAnimTimer > 0) {
+                pulseScale = 0.9 + (0.1 * (1 - hitAnimTimer / 10));
+                const yellowFactor = hitAnimTimer / 10;
+                textColor = blendColors('#f1c40f', '#c0392b', yellowFactor);
                 this.hitAnimTimer--;
             }
             ctx.fillStyle = textColor;
             ctx.font = "bold " + 24 * pulseScale + "px Arial";
             ctx.textAlign = 'center';
             ctx.textBaseline = 'middle';
-            ctx.fillText("-" + this.counter, centerX, ribbonY + ribbonHeight / 2);
+            ctx.fillText("-" + counter, centerX, ribbonY + ribbonHeight / 2);
             ctx.restore();
         }
     }
-    blendColors(color1, color2, factor) {
-        const r1 = parseInt(color1.substring(1, 3), 16);
-        const g1 = parseInt(color1.substring(3, 5), 16);
-        const b1 = parseInt(color1.substring(5, 7), 16);
-        const r2 = parseInt(color2.substring(1, 3), 16);
-        const g2 = parseInt(color2.substring(3, 5), 16);
-        const b2 = parseInt(color2.substring(5, 7), 16);
-        const r = Math.round(r1 * factor + r2 * (1 - factor));
-        const g = Math.round(g1 * factor + g2 * (1 - factor));
-        const b = Math.round(b1 * factor + b2 * (1 - factor));
-        return "#" + r.toString(16).padStart(2, '0') + g.toString(16).padStart(2, '0') + b.toString(16).padStart(2, '0');
+    drawRibbon(ctx) {
+        this.drawRibbon2(ctx, this.bounds, this.type, this.value, this.hitAnimTimer, this.counter)
     }
     isPointInRibbon(x, y) {
         if (this.type === "Plus") {
@@ -1483,10 +1464,74 @@ class PhysicsGame {
     }
 }`)
 
+type blockType = Multiply | Remove | Plus | Diagonal | Chevron
+// todo, is there any way to make this type safe? maybe a few selected colors and then hashtag colors?
+type cssColor = string
+
+let getFillStyle = (type2: blockType): cssColor => {
+  switch type2 {
+  | Multiply
+  | Remove
+  | Plus => "transparent"
+  | Diagonal
+  | Chevron => "#f1c40f"
+  }
+}
+
+// todo option 1: return option<string>
+// todo option 2: throw error
+// todo option 3: change input type to color with properties instead of string
+let blendColors = (color1: string, color2: string, factor: float): string => {
+  let or1: option<int> = Int.fromString(String.substring(color1,~start= 1, ~end= 3), ~radix=16)
+  let og1: option<int> = Int.fromString(String.substring(color1,~start= 3, ~end= 5), ~radix=16)
+  let ob1: option<int> = Int.fromString(String.substring(color1,~start= 5, ~end= 7), ~radix=16)
+  let or2: option<int> = Int.fromString(String.substring(color2,~start= 1, ~end= 3), ~radix=16)
+  let og2: option<int> = Int.fromString(String.substring(color2,~start= 3, ~end= 5), ~radix=16)
+  let ob2: option<int> = Int.fromString(String.substring(color2,~start= 5, ~end= 7), ~radix=16)
+
+  let r1: int = switch (or1) {
+    | Some(r) => r
+    | None => assert(false)
+  }
+  let g1: int = switch (og1) {
+    | Some(g) => g
+    | None => assert(false)
+  }
+  let b1: int = switch (ob1) {
+    | Some(b) => b
+    | None => assert(false)
+  }
+  let r2: int = switch (or2) {
+    | Some(r) => r
+    | None => assert(false)
+  }
+  let g2: int = switch (og2) {
+    | Some(g) => g
+    | None => assert(false)
+  }
+  let b2: int = switch (ob2) {
+    | Some(b) => b
+    | None => assert(false)
+  }
+
+  let r: int = Int.fromFloat(Belt.Float.fromInt(r1) *. factor +. Belt.Float.fromInt(r2) *. (1. -. factor))
+  let g: int = Int.fromFloat(Belt.Float.fromInt(g1) *. factor +. Belt.Float.fromInt(g2) *. (1. -. factor))
+  let b: int = Int.fromFloat(Belt.Float.fromInt(b1) *. factor +. Belt.Float.fromInt(b2) *. (1. -. factor))
+
+  let returnval =
+    "#" ++
+    String.padStart(Int.toString(r, ~radix=16), 2, "0") ++
+    String.padStart(Int.toString(g, ~radix=16), 2, "0") ++
+    String.padStart(Int.toString(b, ~radix=16), 2, "0")
+  returnval
+}
+
+// ---------------------------------------------
+// todo migrate physicsgame to rescript
 @new external physicsGame: unit => unit = "PhysicsGame"
+
 @val external window: 'a = "window"
 
 window["onload"] = () => {
   physicsGame()
 }
-
