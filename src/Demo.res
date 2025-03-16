@@ -1,10 +1,18 @@
+// open Webapi.Canvas
+// open Webapi.Canvas.Canvas2d
+// open Webapi.Dom
+
 Console.log("Hello, world!")
+
 // todo: rename file
 // todo remove package json build scripts for bun
 // todo enable all warnings
 // todo create unit tests for level generation
 // todo create unit tests for physics engine
 // todo create frontend rendering tests
+// todo remove all asserc false statements
+// todo migrate physicsgame to rescript
+// todo migrate from drawing and collision detecting ribbons manually to using matter.js
 
 %%raw(`
 import * as Matter from 'matter-js';
@@ -77,59 +85,11 @@ class Block {
     getFillStyle() {
         return getFillStyle(this.type);
     }
-    drawRibbon2(ctx, bounds, type, value, hitAnimTimer, counter) {
-        const ribbonHeight = (bounds.max.y - bounds.min.y) / 3;
-        const ribbonY = (bounds.max.y + bounds.min.y) / 2 - ribbonHeight / 2;
-        const ribbonWidth = bounds.max.x - bounds.min.x;
-        const centerX = (bounds.min.x + bounds.max.x) / 2;
-        if (type === "Multiply") {
-            ctx.save();
-            ctx.fillStyle = 'rgba(39, 174, 96, 0.3)';
-            ctx.fillRect(bounds.min.x, ribbonY, ribbonWidth, ribbonHeight);
-            ctx.fillStyle = '#27ae60';
-            ctx.font = 'bold 20px Arial';
-            ctx.textAlign = 'center';
-            ctx.textBaseline = 'middle';
-            ctx.fillText("x" + value, centerX, ribbonY + ribbonHeight / 2);
-            ctx.restore();
-        }
-        else if (type === "Plus") {
-            ctx.save();
-            // Green-yellowish hue for Plus blocks
-            ctx.fillStyle = 'rgba(160, 200, 60, 0.3)';
-            ctx.fillRect(bounds.min.x, ribbonY, ribbonWidth, ribbonHeight);
-            ctx.fillStyle = '#9ACD32'; // Yellow-green for Plus effect
-            ctx.font = 'bold 20px Arial';
-            ctx.textAlign = 'center';
-            ctx.textBaseline = 'middle';
-            ctx.fillText("+" + value, centerX, ribbonY + ribbonHeight / 2);
-            ctx.restore();
-        }
-        else if (type === "Remove") {
-            if (hitAnimTimer === undefined) {
-                this.hitAnimTimer = 0;
-            }
-            ctx.save();
-            ctx.fillStyle = 'rgba(231, 76, 60, 0.3)';
-            ctx.fillRect(bounds.min.x, ribbonY, ribbonWidth, ribbonHeight);
-            let pulseScale = 1.0;
-            let textColor = '#c0392b';
-            if (hitAnimTimer > 0) {
-                pulseScale = 0.9 + (0.1 * (1 - hitAnimTimer / 10));
-                const yellowFactor = hitAnimTimer / 10;
-                textColor = blendColors('#f1c40f', '#c0392b', yellowFactor);
-                this.hitAnimTimer--;
-            }
-            ctx.fillStyle = textColor;
-            ctx.font = "bold " + 24 * pulseScale + "px Arial";
-            ctx.textAlign = 'center';
-            ctx.textBaseline = 'middle';
-            ctx.fillText("-" + counter, centerX, ribbonY + ribbonHeight / 2);
-            ctx.restore();
-        }
-    }
     drawRibbon(ctx) {
-        this.drawRibbon2(ctx, this.bounds, this.type, this.value, this.hitAnimTimer, this.counter)
+        const setHitAnimTimer = (hitAnimTimer) => {
+            this.hitAnimTimer = hitAnimTimer;
+        }
+        drawRibbon2(ctx, this.bounds, this.type, this.value, this.hitAnimTimer, this.counter, setHitAnimTimer)
     }
     isPointInRibbon(x, y) {
         if (this.type === "Plus") {
@@ -1482,41 +1442,47 @@ let getFillStyle = (type2: blockType): cssColor => {
 // todo option 2: throw error
 // todo option 3: change input type to color with properties instead of string
 let blendColors = (color1: string, color2: string, factor: float): string => {
-  let or1: option<int> = Int.fromString(String.substring(color1,~start= 1, ~end= 3), ~radix=16)
-  let og1: option<int> = Int.fromString(String.substring(color1,~start= 3, ~end= 5), ~radix=16)
-  let ob1: option<int> = Int.fromString(String.substring(color1,~start= 5, ~end= 7), ~radix=16)
-  let or2: option<int> = Int.fromString(String.substring(color2,~start= 1, ~end= 3), ~radix=16)
-  let og2: option<int> = Int.fromString(String.substring(color2,~start= 3, ~end= 5), ~radix=16)
-  let ob2: option<int> = Int.fromString(String.substring(color2,~start= 5, ~end= 7), ~radix=16)
+  let or1: option<int> = Int.fromString(String.substring(color1, ~start=1, ~end=3), ~radix=16)
+  let og1: option<int> = Int.fromString(String.substring(color1, ~start=3, ~end=5), ~radix=16)
+  let ob1: option<int> = Int.fromString(String.substring(color1, ~start=5, ~end=7), ~radix=16)
+  let or2: option<int> = Int.fromString(String.substring(color2, ~start=1, ~end=3), ~radix=16)
+  let og2: option<int> = Int.fromString(String.substring(color2, ~start=3, ~end=5), ~radix=16)
+  let ob2: option<int> = Int.fromString(String.substring(color2, ~start=5, ~end=7), ~radix=16)
 
-  let r1: int = switch (or1) {
-    | Some(r) => r
-    | None => assert(false)
+  let r1: int = switch or1 {
+  | Some(r) => r
+  | None => assert(false)
   }
-  let g1: int = switch (og1) {
-    | Some(g) => g
-    | None => assert(false)
+  let g1: int = switch og1 {
+  | Some(g) => g
+  | None => assert(false)
   }
-  let b1: int = switch (ob1) {
-    | Some(b) => b
-    | None => assert(false)
+  let b1: int = switch ob1 {
+  | Some(b) => b
+  | None => assert(false)
   }
-  let r2: int = switch (or2) {
-    | Some(r) => r
-    | None => assert(false)
+  let r2: int = switch or2 {
+  | Some(r) => r
+  | None => assert(false)
   }
-  let g2: int = switch (og2) {
-    | Some(g) => g
-    | None => assert(false)
+  let g2: int = switch og2 {
+  | Some(g) => g
+  | None => assert(false)
   }
-  let b2: int = switch (ob2) {
-    | Some(b) => b
-    | None => assert(false)
+  let b2: int = switch ob2 {
+  | Some(b) => b
+  | None => assert(false)
   }
 
-  let r: int = Int.fromFloat(Belt.Float.fromInt(r1) *. factor +. Belt.Float.fromInt(r2) *. (1. -. factor))
-  let g: int = Int.fromFloat(Belt.Float.fromInt(g1) *. factor +. Belt.Float.fromInt(g2) *. (1. -. factor))
-  let b: int = Int.fromFloat(Belt.Float.fromInt(b1) *. factor +. Belt.Float.fromInt(b2) *. (1. -. factor))
+  let r: int = Int.fromFloat(
+    Belt.Float.fromInt(r1) *. factor +. Belt.Float.fromInt(r2) *. (1. -. factor),
+  )
+  let g: int = Int.fromFloat(
+    Belt.Float.fromInt(g1) *. factor +. Belt.Float.fromInt(g2) *. (1. -. factor),
+  )
+  let b: int = Int.fromFloat(
+    Belt.Float.fromInt(b1) *. factor +. Belt.Float.fromInt(b2) *. (1. -. factor),
+  )
 
   let returnval =
     "#" ++
@@ -1525,9 +1491,125 @@ let blendColors = (color1: string, color2: string, factor: float): string => {
     String.padStart(Int.toString(b, ~radix=16), 2, "0")
   returnval
 }
+type point = {x: int, y: int}
+type bounds = {min: point, max: point}
 
-// ---------------------------------------------
-// todo migrate physicsgame to rescript
+type myContext = Webapi.Canvas.Canvas2d.t
+
+let drawRibbon2 = (
+  ctx: myContext,
+  bounds: bounds,
+  blockType,
+  value,
+  hitAnimTimer: option<int>,
+  counter,
+  setHitAnimTimer,
+) => {
+  let ribbonHeight: float = Belt.Float.fromInt(bounds.max.y - bounds.min.y) /. 3.
+  let ribbonY: float = Belt.Float.fromInt(bounds.max.y + bounds.min.y) /. 2. -. ribbonHeight /. 2.
+  let ribbonWidth: float = Belt.Float.fromInt(bounds.max.x - bounds.min.x)
+  let centerX: float = Belt.Float.fromInt(bounds.min.x + bounds.max.x) /. 2.
+
+  switch blockType {
+  | Multiply => {
+      ctx->Webapi.Canvas.Canvas2d.save
+      ctx->Webapi.Canvas.Canvas2d.setFillStyle(String, "rgba(39, 174, 96, 0.3)")
+      ctx->Webapi.Canvas.Canvas2d.fillRect(
+        ~x=Belt.Int.toFloat(bounds.min.x),
+        ~y=ribbonY,
+        ~w=ribbonWidth,
+        ~h=ribbonHeight,
+      )
+      ctx->Webapi.Canvas.Canvas2d.setFillStyle(String, "#27ae60")
+      ctx->Webapi.Canvas.Canvas2d.font("bold 20px Arial")
+      ctx->Webapi.Canvas.Canvas2d.textAlign("center")
+      ctx->Webapi.Canvas.Canvas2d.textBaseline("middle")
+      ctx->Webapi.Canvas.Canvas2d.fillText(
+        "x" ++ value,
+        ~x=centerX,
+        ~y=ribbonY +. ribbonHeight /. 2.,
+        (),
+      )
+      ctx->Webapi.Canvas.Canvas2d.restore
+    }
+  | Plus => {
+      ctx->Webapi.Canvas.Canvas2d.save
+
+      // Green-yellowish hue for Plus blocks
+      ctx->Webapi.Canvas.Canvas2d.setFillStyle(String, "rgba(160, 200, 60, 0.3)")
+      ctx->Webapi.Canvas.Canvas2d.fillRect(
+        ~x=Belt.Int.toFloat(bounds.min.x),
+        ~y=ribbonY,
+        ~w=ribbonWidth,
+        ~h=ribbonHeight,
+      )
+      ctx->Webapi.Canvas.Canvas2d.setFillStyle(String, "#9ACD32")
+      ctx->Webapi.Canvas.Canvas2d.font("bold 20px Arial")
+      ctx->Webapi.Canvas.Canvas2d.textAlign("center")
+      ctx->Webapi.Canvas.Canvas2d.textBaseline("middle")
+      ctx->Webapi.Canvas.Canvas2d.fillText(
+        "+" ++ value,
+        ~x=centerX,
+        ~y=ribbonY +. ribbonHeight /. 2.,
+        (),
+      )
+      ctx->Webapi.Canvas.Canvas2d.restore
+    }
+  | Remove => {
+      // shit i think this is just a normal null check, and we should actually make hitAnimTimer not be nullable but just int.
+      if hitAnimTimer === None {
+        setHitAnimTimer(0)
+      }
+
+      let localHitAnimTimer = switch hitAnimTimer {
+      | Some(h) => h
+      | None => 0
+      }
+
+      // shit is it possible to encode this in the type system?
+      if localHitAnimTimer < 0 {
+        assert(false)
+      }
+
+      // shit :thinking: i'm not quite sure how to mutate this variable, and use "object oriented" in rescript.
+      if localHitAnimTimer > 0 {
+        setHitAnimTimer(localHitAnimTimer - 1)
+      }
+
+      ctx->Webapi.Canvas.Canvas2d.save
+      ctx->Webapi.Canvas.Canvas2d.setFillStyle(String, "rgba(231, 76, 60, 0.3)")
+
+      ctx->Webapi.Canvas.Canvas2d.fillRect(
+        ~x=Belt.Int.toFloat(bounds.min.x),
+        ~y=ribbonY,
+        ~w=ribbonWidth,
+        ~h=ribbonHeight,
+      )
+
+      let pulseScale = 0.9 +. 0.1 *. (1. -. Belt.Float.fromInt(localHitAnimTimer) /. 10.)
+      let yellowFactor: float = Belt.Float.fromInt(localHitAnimTimer) /. 10.
+      let textColor = blendColors("#f1c40f", "#c0392b", yellowFactor)
+
+      ctx->Webapi.Canvas.Canvas2d.setFillStyle(String, textColor)
+
+      ctx->Webapi.Canvas.Canvas2d.font(
+        "bold " ++ Belt.Float.toString(24. *. pulseScale) ++ "px Arial",
+      )
+      ctx->Webapi.Canvas.Canvas2d.textAlign("center")
+      ctx->Webapi.Canvas.Canvas2d.textBaseline("middle")
+      ctx->Webapi.Canvas.Canvas2d.fillText(
+        "-" ++ counter,
+        ~x=centerX,
+        ~y=ribbonY +. ribbonHeight /. 2.,
+        (),
+      )
+      ctx->Webapi.Canvas.Canvas2d.restore
+    }
+  | Diagonal => () // Diagonals do not have a ribbon
+  | Chevron => () // Chevrons do not have a ribbon
+  }
+}
+
 @new external physicsGame: unit => unit = "PhysicsGame"
 
 @val external window: 'a = "window"

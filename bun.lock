@@ -6,6 +6,7 @@
         "@rescript/core": "1.6.1",
         "matter-js": "^0.20.0",
         "rescript": "11.1.4",
+        "rescript-webapi": "^0.10.0",
         "typescript": "^5.8.2",
       },
       "devDependencies": {
@@ -29,6 +30,8 @@
     "matter-js": ["matter-js@0.20.0", "", {}, "sha512-iC9fYR7zVT3HppNnsFsp9XOoQdQN2tUyfaKg4CHLH8bN+j6GT4Gw7IH2rP0tflAebrHFw730RR3DkVSZRX8hwA=="],
 
     "rescript": ["rescript@11.1.4", "", { "bin": { "bsc": "bsc", "rescript": "rescript", "bstracing": "lib/bstracing" } }, "sha512-0bGU0bocihjSC6MsE3TMjHjY0EUpchyrREquLS8VsZ3ohSMD+VHUEwimEfB3kpBI1vYkw3UFZ3WD8R28guz/Vw=="],
+
+    "rescript-webapi": ["rescript-webapi@0.10.0", "", {}, "sha512-QgwMMQO7INz0SK8TX91ibGDrOCRAteOuOxhQi3CIR8FMx0wykbp2rRU/TF4GyfKagk2Nby8snPhQnstSxnmm/g=="],
 
     "typescript": ["typescript@5.8.2", "", { "bin": { "tsc": "bin/tsc", "tsserver": "bin/tsserver" } }, "sha512-aJn6wq13/afZp/jT9QZmwEjDqqvSGp1VT5GVg+f/t6/oVyrgXM6BY1h9BRh/O5p3PlUPAe+WuiEZOmb/49RqoQ=="],
 

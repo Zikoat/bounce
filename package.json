@@ -11,6 +11,7 @@
     "@rescript/core": "1.6.1",
     "matter-js": "^0.20.0",
     "rescript": "11.1.4",
+    "rescript-webapi": "^0.10.0",
     "typescript": "^5.8.2"
   },
   "devDependencies": {

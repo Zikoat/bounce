@@ -10,9 +10,13 @@
   },
   "suffix": ".res.mjs",
   "bs-dependencies": [
-    "@rescript/core"
+    "@rescript/core",
+    "rescript-webapi"
   ],
   "bsc-flags": [
     "-open RescriptCore"
-  ]
+  ],
+  "warnings": {
+    "error": "+a"
+  }
 }

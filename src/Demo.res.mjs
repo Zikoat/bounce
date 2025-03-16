@@ -74,59 +74,11 @@ class Block {
     getFillStyle() {
         return getFillStyle(this.type);
     }
-    drawRibbon2(ctx, bounds, type, value, hitAnimTimer, counter) {
-        const ribbonHeight = (bounds.max.y - bounds.min.y) / 3;
-        const ribbonY = (bounds.max.y + bounds.min.y) / 2 - ribbonHeight / 2;
-        const ribbonWidth = bounds.max.x - bounds.min.x;
-        const centerX = (bounds.min.x + bounds.max.x) / 2;
-        if (type === "Multiply") {
-            ctx.save();
-            ctx.fillStyle = 'rgba(39, 174, 96, 0.3)';
-            ctx.fillRect(bounds.min.x, ribbonY, ribbonWidth, ribbonHeight);
-            ctx.fillStyle = '#27ae60';
-            ctx.font = 'bold 20px Arial';
-            ctx.textAlign = 'center';
-            ctx.textBaseline = 'middle';
-            ctx.fillText("x" + value, centerX, ribbonY + ribbonHeight / 2);
-            ctx.restore();
-        }
-        else if (type === "Plus") {
-            ctx.save();
-            // Green-yellowish hue for Plus blocks
-            ctx.fillStyle = 'rgba(160, 200, 60, 0.3)';
-            ctx.fillRect(bounds.min.x, ribbonY, ribbonWidth, ribbonHeight);
-            ctx.fillStyle = '#9ACD32'; // Yellow-green for Plus effect
-            ctx.font = 'bold 20px Arial';
-            ctx.textAlign = 'center';
-            ctx.textBaseline = 'middle';
-            ctx.fillText("+" + value, centerX, ribbonY + ribbonHeight / 2);
-            ctx.restore();
-        }
-        else if (type === "Remove") {
-            if (hitAnimTimer === undefined) {
-                this.hitAnimTimer = 0;
-            }
-            ctx.save();
-            ctx.fillStyle = 'rgba(231, 76, 60, 0.3)';
-            ctx.fillRect(bounds.min.x, ribbonY, ribbonWidth, ribbonHeight);
-            let pulseScale = 1.0;
-            let textColor = '#c0392b';
-            if (hitAnimTimer > 0) {
-                pulseScale = 0.9 + (0.1 * (1 - hitAnimTimer / 10));
-                const yellowFactor = hitAnimTimer / 10;
-                textColor = blendColors('#f1c40f', '#c0392b', yellowFactor);
-                this.hitAnimTimer--;
-            }
-            ctx.fillStyle = textColor;
-            ctx.font = "bold " + 24 * pulseScale + "px Arial";
-            ctx.textAlign = 'center';
-            ctx.textBaseline = 'middle';
-            ctx.fillText("-" + counter, centerX, ribbonY + ribbonHeight / 2);
-            ctx.restore();
-        }
-    }
     drawRibbon(ctx) {
-        this.drawRibbon2(ctx, this.bounds, this.type, this.value, this.hitAnimTimer, this.counter)
+        const setHitAnimTimer = (hitAnimTimer) => {
+            this.hitAnimTimer = hitAnimTimer;
+        }
+        drawRibbon2(ctx, this.bounds, this.type, this.value, this.hitAnimTimer, this.counter, setHitAnimTimer)
     }
     isPointInRibbon(x, y) {
         if (this.type === "Plus") {
@@ -1487,8 +1439,8 @@ function blendColors(color1, color2, factor) {
           RE_EXN_ID: "Assert_failure",
           _1: [
             "Demo.res",
-            1494,
-            14
+            1454,
+            12
           ],
           Error: new Error()
         };
@@ -1501,8 +1453,8 @@ function blendColors(color1, color2, factor) {
           RE_EXN_ID: "Assert_failure",
           _1: [
             "Demo.res",
-            1498,
-            14
+            1458,
+            12
           ],
           Error: new Error()
         };
@@ -1515,8 +1467,8 @@ function blendColors(color1, color2, factor) {
           RE_EXN_ID: "Assert_failure",
           _1: [
             "Demo.res",
-            1502,
-            14
+            1462,
+            12
           ],
           Error: new Error()
         };
@@ -1529,8 +1481,8 @@ function blendColors(color1, color2, factor) {
           RE_EXN_ID: "Assert_failure",
           _1: [
             "Demo.res",
-            1506,
-            14
+            1466,
+            12
           ],
           Error: new Error()
         };
@@ -1543,8 +1495,8 @@ function blendColors(color1, color2, factor) {
           RE_EXN_ID: "Assert_failure",
           _1: [
             "Demo.res",
-            1510,
-            14
+            1470,
+            12
           ],
           Error: new Error()
         };
@@ -1557,8 +1509,8 @@ function blendColors(color1, color2, factor) {
           RE_EXN_ID: "Assert_failure",
           _1: [
             "Demo.res",
-            1514,
-            14
+            1474,
+            12
           ],
           Error: new Error()
         };
@@ -1569,6 +1521,73 @@ function blendColors(color1, color2, factor) {
   return "#" + r.toString(16).padStart(2, "0") + g.toString(16).padStart(2, "0") + b.toString(16).padStart(2, "0");
 }
 
+function drawRibbon2(ctx, bounds, blockType, value, hitAnimTimer, counter, setHitAnimTimer) {
+  var ribbonHeight = (bounds.max.y - bounds.min.y | 0) / 3;
+  var ribbonY = (bounds.max.y + bounds.min.y | 0) / 2 - ribbonHeight / 2;
+  var ribbonWidth = bounds.max.x - bounds.min.x | 0;
+  var centerX = (bounds.min.x + bounds.max.x | 0) / 2;
+  switch (blockType) {
+    case "Multiply" :
+        ctx.save();
+        ctx.fillStyle = "rgba(39, 174, 96, 0.3)";
+        ctx.fillRect(bounds.min.x, ribbonY, ribbonWidth, ribbonHeight);
+        ctx.fillStyle = "#27ae60";
+        ctx.font = "bold 20px Arial";
+        ctx.textAlign = "center";
+        ctx.textBaseline = "middle";
+        ctx.fillText("x" + value, centerX, ribbonY + ribbonHeight / 2, undefined);
+        ctx.restore();
+        return ;
+    case "Remove" :
+        if (hitAnimTimer === undefined) {
+          setHitAnimTimer(0);
+        }
+        var localHitAnimTimer = hitAnimTimer !== undefined ? hitAnimTimer : 0;
+        if (localHitAnimTimer < 0) {
+          throw {
+                RE_EXN_ID: "Assert_failure",
+                _1: [
+                  "Demo.res",
+                  1571,
+                  8
+                ],
+                Error: new Error()
+              };
+        }
+        if (localHitAnimTimer > 0) {
+          setHitAnimTimer(localHitAnimTimer - 1 | 0);
+        }
+        ctx.save();
+        ctx.fillStyle = "rgba(231, 76, 60, 0.3)";
+        ctx.fillRect(bounds.min.x, ribbonY, ribbonWidth, ribbonHeight);
+        var pulseScale = 0.9 + 0.1 * (1 - localHitAnimTimer / 10);
+        var yellowFactor = localHitAnimTimer / 10;
+        var textColor = blendColors("#f1c40f", "#c0392b", yellowFactor);
+        ctx.fillStyle = textColor;
+        ctx.font = "bold " + String(24 * pulseScale) + "px Arial";
+        ctx.textAlign = "center";
+        ctx.textBaseline = "middle";
+        ctx.fillText("-" + counter, centerX, ribbonY + ribbonHeight / 2, undefined);
+        ctx.restore();
+        return ;
+    case "Plus" :
+        ctx.save();
+        ctx.fillStyle = "rgba(160, 200, 60, 0.3)";
+        ctx.fillRect(bounds.min.x, ribbonY, ribbonWidth, ribbonHeight);
+        ctx.fillStyle = "#9ACD32";
+        ctx.font = "bold 20px Arial";
+        ctx.textAlign = "center";
+        ctx.textBaseline = "middle";
+        ctx.fillText("+" + value, centerX, ribbonY + ribbonHeight / 2, undefined);
+        ctx.restore();
+        return ;
+    case "Diagonal" :
+    case "Chevron" :
+        return ;
+    
+  }
+}
+
 window.onload = (function () {
     new PhysicsGame();
   });
@@ -1576,5 +1595,6 @@ window.onload = (function () {
 export {
   getFillStyle ,
   blendColors ,
+  drawRibbon2 ,
 }
 /*  Not a pure module */
