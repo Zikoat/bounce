@@ -1474,6 +1474,23 @@ let blendColors = (color1: string, color2: string, factor: float): string => {
     String.padStart(Int.toString(b, ~radix=16), 2, "0")
   returnval
 }
+
+// todo: disable running tests in prod
+// todo: put error in console if test fails
+// todo: maybe use bun test runner instead
+// shit create assertEquals function, and that throws an error with the expected and actual.
+assert(blendColors("#FF0088", "#FF0088", 0.) == "#ff0088")
+assert(blendColors("#000000", "#FF0088", 0.) == "#ff0088")
+assert(blendColors("#000000", "#FF0088", 1.) == "#000000")
+assert(blendColors("#000000", "#FF0088", 0.5) == "#7f0044")
+// let test = (_name: string, fn: unit => unit) => {
+//   fn()
+// }
+
+// test("color blending", () => {
+
+// })
+
 type point = {x: int, y: int}
 type bounds = {min: point, max: point}
 
@@ -1608,8 +1625,11 @@ let isPointInRibbon2 = (x, y, blockType, bounds) => {
 
 @new external physicsGame: unit => unit = "PhysicsGame"
 
+// shit migrate to use webapi
 @val external window: 'a = "window"
 
-window["onload"] = () => {
-  physicsGame()
+if Type.typeof(window) == #object {
+  window["onload"] = () => {
+    physicsGame()
+  }
 }

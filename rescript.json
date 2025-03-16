@@ -8,10 +8,11 @@
     "module": "esmodule",
     "in-source": true
   },
-  "suffix": ".res.mjs",
+  "suffix": ".js",
   "bs-dependencies": [
     "@rescript/core",
-    "rescript-webapi"
+    "rescript-webapi",
+    "rescript-test"
   ],
   "bsc-flags": [
     "-open RescriptCore"
