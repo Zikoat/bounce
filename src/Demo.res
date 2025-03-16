@@ -92,27 +92,10 @@ class Block {
         drawRibbon2(ctx, this.bounds, this.type, this.value, this.hitAnimTimer, this.counter, setHitAnimTimer)
     }
     isPointInRibbon(x, y) {
-        if (this.type === "Plus") {
-            const ribbonHeight = (this.bounds.max.y - this.bounds.min.y) / 3;
-            const ribbonY = (this.bounds.max.y + this.bounds.min.y) / 2 - ribbonHeight / 2;
-            const isInRibbon = x >= this.bounds.min.x &&
-                x <= this.bounds.max.x &&
-                y >= ribbonY &&
-                y <= ribbonY + ribbonHeight;
-            if (isInRibbon) {
-                console.log("Ball is inside Plus block ribbon area!");
-            }
-            return isInRibbon;
-        }
-        if (this.type !== "Multiply" && this.type !== "Remove")
-            return false;
-        const ribbonHeight = (this.bounds.max.y - this.bounds.min.y) / 3;
-        const ribbonY = (this.bounds.max.y + this.bounds.min.y) / 2 - ribbonHeight / 2;
-        return x >= this.bounds.min.x &&
-            x <= this.bounds.max.x &&
-            y >= ribbonY &&
-            y <= ribbonY + ribbonHeight;
+        return isPointInRibbon2(x, y, this.type, this.bounds)
+        
     }
+
 }
 class PhysicsGame {
     // Static constants that were previously global
@@ -1428,8 +1411,8 @@ type blockType = Multiply | Remove | Plus | Diagonal | Chevron
 // todo, is there any way to make this type safe? maybe a few selected colors and then hashtag colors?
 type cssColor = string
 
-let getFillStyle = (type2: blockType): cssColor => {
-  switch type2 {
+let getFillStyle = (blockType: blockType): cssColor => {
+  switch blockType {
   | Multiply
   | Remove
   | Plus => "transparent"
@@ -1496,20 +1479,13 @@ type bounds = {min: point, max: point}
 
 type myContext = Webapi.Canvas.Canvas2d.t
 
-let drawRibbon2 = (
-  ctx: myContext,
-  bounds: bounds,
-  blockType,
-  value,
-  hitAnimTimer: option<int>,
-  counter,
-  setHitAnimTimer,
-) => {
-  let ribbonHeight: float = Belt.Float.fromInt(bounds.max.y - bounds.min.y) /. 3.
-  let ribbonY: float = Belt.Float.fromInt(bounds.max.y + bounds.min.y) /. 2. -. ribbonHeight /. 2.
-  let ribbonWidth: float = Belt.Float.fromInt(bounds.max.x - bounds.min.x)
-  let centerX: float = Belt.Float.fromInt(bounds.min.x + bounds.max.x) /. 2.
+let drawRibbon2 = (ctx, bounds, blockType, value, hitAnimTimer, counter, setHitAnimTimer) => {
+  let ribbonHeight = Belt.Float.fromInt(bounds.max.y - bounds.min.y) /. 3.
+  let ribbonY = Belt.Float.fromInt(bounds.max.y + bounds.min.y) /. 2. -. ribbonHeight /. 2.
+  let ribbonWidth = Belt.Float.fromInt(bounds.max.x - bounds.min.x)
+  let centerX = Belt.Float.fromInt(bounds.min.x + bounds.max.x) /. 2.
 
+  // shit, maybe extract ribbon drawing to a function
   switch blockType {
   | Multiply => {
       ctx->Webapi.Canvas.Canvas2d.save
@@ -1609,6 +1585,26 @@ let drawRibbon2 = (
   | Chevron => () // Chevrons do not have a ribbon
   }
 }
+
+// shit this should probably use the existing drawing logic for ribbons?
+// also, the radius of the balls are not taken into account
+let isPointInRibbon2 = (x, y, blockType, bounds) => {
+  switch blockType {
+  | Plus | Multiply | Remove => {
+      let ribbonHeight = Belt.Float.fromInt(bounds.max.y - bounds.min.y) /. 3.
+
+      let ribbonY = Belt.Float.fromInt(bounds.max.y + bounds.min.y) /. 2. -. ribbonHeight /. 2.
+
+      let isInRibbon =
+        x >= bounds.min.x && x <= bounds.max.x && y >= ribbonY && y <= ribbonY +. ribbonHeight
+
+      isInRibbon
+    }
+  | Chevron | Diagonal => false
+  }
+}
+
+// ---------------------------------------------
 
 @new external physicsGame: unit => unit = "PhysicsGame"
 

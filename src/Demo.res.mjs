@@ -81,27 +81,10 @@ class Block {
         drawRibbon2(ctx, this.bounds, this.type, this.value, this.hitAnimTimer, this.counter, setHitAnimTimer)
     }
     isPointInRibbon(x, y) {
-        if (this.type === "Plus") {
-            const ribbonHeight = (this.bounds.max.y - this.bounds.min.y) / 3;
-            const ribbonY = (this.bounds.max.y + this.bounds.min.y) / 2 - ribbonHeight / 2;
-            const isInRibbon = x >= this.bounds.min.x &&
-                x <= this.bounds.max.x &&
-                y >= ribbonY &&
-                y <= ribbonY + ribbonHeight;
-            if (isInRibbon) {
-                console.log("Ball is inside Plus block ribbon area!");
-            }
-            return isInRibbon;
-        }
-        if (this.type !== "Multiply" && this.type !== "Remove")
-            return false;
-        const ribbonHeight = (this.bounds.max.y - this.bounds.min.y) / 3;
-        const ribbonY = (this.bounds.max.y + this.bounds.min.y) / 2 - ribbonHeight / 2;
-        return x >= this.bounds.min.x &&
-            x <= this.bounds.max.x &&
-            y >= ribbonY &&
-            y <= ribbonY + ribbonHeight;
+        return isPointInRibbon2(x, y, this.type, this.bounds)
+        
     }
+
 }
 class PhysicsGame {
     // Static constants that were previously global
@@ -1414,8 +1397,8 @@ class PhysicsGame {
 }
 ;
 
-function getFillStyle(type2) {
-  switch (type2) {
+function getFillStyle(blockType) {
+  switch (blockType) {
     case "Diagonal" :
     case "Chevron" :
         return "#f1c40f";
@@ -1439,7 +1422,7 @@ function blendColors(color1, color2, factor) {
           RE_EXN_ID: "Assert_failure",
           _1: [
             "Demo.res",
-            1454,
+            1437,
             12
           ],
           Error: new Error()
@@ -1453,7 +1436,7 @@ function blendColors(color1, color2, factor) {
           RE_EXN_ID: "Assert_failure",
           _1: [
             "Demo.res",
-            1458,
+            1441,
             12
           ],
           Error: new Error()
@@ -1467,7 +1450,7 @@ function blendColors(color1, color2, factor) {
           RE_EXN_ID: "Assert_failure",
           _1: [
             "Demo.res",
-            1462,
+            1445,
             12
           ],
           Error: new Error()
@@ -1481,7 +1464,7 @@ function blendColors(color1, color2, factor) {
           RE_EXN_ID: "Assert_failure",
           _1: [
             "Demo.res",
-            1466,
+            1449,
             12
           ],
           Error: new Error()
@@ -1495,7 +1478,7 @@ function blendColors(color1, color2, factor) {
           RE_EXN_ID: "Assert_failure",
           _1: [
             "Demo.res",
-            1470,
+            1453,
             12
           ],
           Error: new Error()
@@ -1509,7 +1492,7 @@ function blendColors(color1, color2, factor) {
           RE_EXN_ID: "Assert_failure",
           _1: [
             "Demo.res",
-            1474,
+            1457,
             12
           ],
           Error: new Error()
@@ -1548,7 +1531,7 @@ function drawRibbon2(ctx, bounds, blockType, value, hitAnimTimer, counter, setHi
                 RE_EXN_ID: "Assert_failure",
                 _1: [
                   "Demo.res",
-                  1571,
+                  1555,
                   8
                 ],
                 Error: new Error()
@@ -1588,6 +1571,22 @@ function drawRibbon2(ctx, bounds, blockType, value, hitAnimTimer, counter, setHi
   }
 }
 
+function isPointInRibbon2(x, y, blockType, bounds) {
+  switch (blockType) {
+    case "Diagonal" :
+    case "Chevron" :
+        return false;
+    default:
+      var ribbonHeight = (bounds.max.y - bounds.min.y | 0) / 3;
+      var ribbonY = (bounds.max.y + bounds.min.y | 0) / 2 - ribbonHeight / 2;
+      if (x >= bounds.min.x && x <= bounds.max.x && y >= ribbonY) {
+        return y <= ribbonY + ribbonHeight;
+      } else {
+        return false;
+      }
+  }
+}
+
 window.onload = (function () {
     new PhysicsGame();
   });
@@ -1596,5 +1595,6 @@ export {
   getFillStyle ,
   blendColors ,
   drawRibbon2 ,
+  isPointInRibbon2 ,
 }
 /*  Not a pure module */
