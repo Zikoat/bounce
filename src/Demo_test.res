@@ -295,6 +295,7 @@ class PhysicsGame {
         }
         this.blocks = [];
     }
+   
     generateRandomBlockLayout() {
         // Create an array filled with empty blocks
         const layout = [];
@@ -309,14 +310,6 @@ class PhysicsGame {
                 lane[blockIndex] = "Empty";
             }
         }
-        const blockTypeWeights = {
-            ["Empty"]: Math.max(10 - this.currentLevel, 5),
-            ["Multiply"]: Math.min(6 + Math.floor(this.currentLevel / 2), 12),
-            ["Remove"]: Math.min(5 + Math.floor(this.currentLevel / 3), 9),
-            ["Diagonal"]: Math.min(6 + Math.floor(this.currentLevel), 12),
-            ["Plus"]: Math.min(5 + Math.floor(this.currentLevel / 2), 10),
-            ["Chevron"]: Math.min(4 + Math.floor(this.currentLevel / 2), 8)
-        };
         // First pass: generate random blocks
         for (let laneIndex = 0; laneIndex < this.LANE_COUNT; laneIndex++) {
             const lane = layout[laneIndex];
@@ -328,7 +321,7 @@ class PhysicsGame {
                 if (blockIndex === 0) {
                     continue;
                 }
-                lane[blockIndex] = this.getRandomBlockType(blockTypeWeights);
+                lane[blockIndex] = this.getRandomBlockType(this.currentLevel);
             }
         }
         // Second pass: resolve conflicts
@@ -469,21 +462,8 @@ class PhysicsGame {
         }
         return layout;
     }
-    getRandomBlockType(weights) {
-        let totalWeight = 0;
-        let type;
-        for (type in weights) {
-            totalWeight += weights[type];
-        }
-        const randomValue = Math.random() * totalWeight;
-        let cumulativeWeight = 0;
-        for (type in weights) {
-            cumulativeWeight += weights[type];
-            if (randomValue < cumulativeWeight) {
-                return type;
-            }
-        }
-        return "Empty";
+    getRandomBlockType(currentLevel) {
+        return getRandomBlockType2(currentLevel);
     }
     createDiagonalWall(block, laneIndex, blockIndex) {
         if (block.diagonalWall) {
@@ -1407,7 +1387,7 @@ class PhysicsGame {
     }
 }`)
 
-type blockType = Multiply | Remove | Plus | Diagonal | Chevron
+type blockType = Empty | Multiply | Remove | Diagonal | Plus | Chevron
 // todo, is there any way to make this type safe? maybe a few selected colors and then hashtag colors?
 type cssColor = string
 
@@ -1415,7 +1395,8 @@ let getFillStyle = (blockType: blockType): cssColor => {
   switch blockType {
   | Multiply
   | Remove
-  | Plus => "transparent"
+  | Plus
+  | Empty => "transparent"
   | Diagonal
   | Chevron => "#f1c40f"
   }
@@ -1483,13 +1464,6 @@ assert(blendColors("#FF0088", "#FF0088", 0.) == "#ff0088")
 assert(blendColors("#000000", "#FF0088", 0.) == "#ff0088")
 assert(blendColors("#000000", "#FF0088", 1.) == "#000000")
 assert(blendColors("#000000", "#FF0088", 0.5) == "#7f0044")
-// let test = (_name: string, fn: unit => unit) => {
-//   fn()
-// }
-
-// test("color blending", () => {
-
-// })
 
 type point = {x: int, y: int}
 type bounds = {min: point, max: point}
@@ -1598,13 +1572,14 @@ let drawRibbon2 = (ctx, bounds, blockType, value, hitAnimTimer, counter, setHitA
       )
       ctx->Webapi.Canvas.Canvas2d.restore
     }
-  | Diagonal => () // Diagonals do not have a ribbon
-  | Chevron => () // Chevrons do not have a ribbon
+  | Diagonal
+  | Chevron
+  | Empty => () // These do not have a ribbon
   }
 }
 
-// shit this should probably use the existing drawing logic for ribbons?
-// also, the radius of the balls are not taken into account
+// shit this should probably use the existing drawing logic for ribbons? think matter js has a sensors thing. 
+// shit also, the radius of the balls are not taken into account
 let isPointInRibbon2 = (x, y, blockType, bounds) => {
   switch blockType {
   | Plus | Multiply | Remove => {
@@ -1617,7 +1592,70 @@ let isPointInRibbon2 = (x, y, blockType, bounds) => {
 
       isInRibbon
     }
-  | Chevron | Diagonal => false
+  | Chevron | Diagonal | Empty => false
+  }
+}
+
+let sum = myArray => {
+  Array.reduce(myArray, 0, (prev, cur) => {prev + cur})
+}
+
+let randomWeighted = blockTypeWeights => {
+  let weights = Belt.Array.map([...blockTypeWeights], v => {
+    let (_, weight) = v
+    weight
+  })
+
+  let totalWeight = Array.reduce(weights, 0, (prev, cur) => {prev + cur})
+  // Console.log(totalWeight)
+
+  let randomValue = Math.random() *. (totalWeight :> float)
+
+  let myValue = ref(None)
+  let cumulativeWeight = ref(0.)
+
+  let _ = Array.forEachWithIndex(weights, (x, i) => {
+    // Console.log6(x, i, weights2, myValue.contents, nextVal, randomValue)
+    let nextVal = cumulativeWeight.contents +. (x :> float)
+    if nextVal > randomValue && myValue.contents == None {
+      myValue := Some(i)
+    }
+    cumulativeWeight := nextVal
+  })
+
+  switch myValue.contents {
+  | Some(num) if num > weights->Array.length - 1 => assert(false)
+  | Some(num) => num
+  | None => weights->Array.length - 1
+  }
+}
+
+let results =
+  Array.make(~length=1000, 0)->Array.map(_v =>
+    randomWeighted([(Empty, 3), (Multiply, 1), (Remove, 1), (Diagonal, 1), (Plus, 1), (Chevron, 3)])
+  )
+Console.log2(0, results->Array.filter(v => v == 0)->Array.length)
+Console.log2(1, results->Array.filter(v => v == 1)->Array.length)
+Console.log2(2, results->Array.filter(v => v == 2)->Array.length)
+Console.log2(3, results->Array.filter(v => v == 3)->Array.length)
+Console.log2(4, results->Array.filter(v => v == 4)->Array.length)
+Console.log2(5, results->Array.filter(v => v == 5)->Array.length)
+Console.log2("total", results->Array.length)
+
+let getRandomBlockType2 = (currentLevel): blockType => {
+  let blockTypeWeights = [
+    (Empty, Math.Int.max(10 - currentLevel, 5)),
+    (Multiply, Math.Int.min(6 + currentLevel / 2, 12)),
+    (Remove, Math.Int.min(5 + currentLevel / 3, 9)),
+    (Diagonal, Math.Int.min(6 + currentLevel, 12)),
+    (Plus, Math.Int.min(5 + currentLevel / 2, 10)),
+    (Chevron, Math.Int.min(4 + currentLevel / 2, 8)),
+  ]
+
+  let index = randomWeighted(blockTypeWeights)
+  switch blockTypeWeights[index] {
+  | Some(returnBlockType, _weight) => returnBlockType
+  | None => assert(false)
   }
 }
 
