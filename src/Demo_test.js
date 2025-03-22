@@ -687,44 +687,13 @@ class PhysicsGame {
         }
     }
     drawMultiplyEffect(x, y, value = 2) {
-        const ctx = this.render.context;
-        ctx.save();
-        ctx.strokeStyle = '#27ae60';
-        ctx.lineWidth = 2;
-        ctx.beginPath();
-        ctx.arc(x, y, this.BALL_RADIUS * 2, 0, Math.PI * 2);
-        ctx.stroke();
-        ctx.fillStyle = '#27ae60';
-        ctx.font = 'bold 20px Arial';
-        ctx.textAlign = 'center';
-        ctx.textBaseline = 'middle';
-        ctx.fillText("x" + value, x, y);
-        ctx.restore();
+        drawMultiplyEffect2(x, y, value, this.render.context, this.BALL_RADIUS);
     }
     drawPlusEffect(x, y, value = 2) {
-        const ctx = this.render.context;
-        ctx.save();
-        ctx.strokeStyle = '#9ACD32'; // Yellow-green for Plus effect
-        ctx.lineWidth = 2;
-        ctx.beginPath();
-        ctx.arc(x, y, this.BALL_RADIUS * 2, 0, Math.PI * 2);
-        ctx.stroke();
-        ctx.fillStyle = '#9ACD32';
-        ctx.font = 'bold 20px Arial';
-        ctx.textAlign = 'center';
-        ctx.textBaseline = 'middle';
-        ctx.fillText("+" + value, x, y);
-        ctx.restore();
+        drawPlusEffect2(x, y, value, this.render.context, this.BALL_RADIUS);
     }
     drawRemoveEffect(x, y) {
-        const ctx = this.render.context;
-        ctx.save();
-        ctx.strokeStyle = '#f1c40f';
-        ctx.lineWidth = 2;
-        ctx.beginPath();
-        ctx.arc(x, y, this.BALL_RADIUS, 0, Math.PI * 2);
-        ctx.stroke();
-        ctx.restore();
+        drawRemoveEffect2(x, y, this.render.context, this.BALL_RADIUS);
     }
     setupEventListeners() {
         this.canvas.addEventListener('mousemove', (event) => {
@@ -1404,7 +1373,7 @@ function blendColors(color1, color2, factor) {
           RE_EXN_ID: "Assert_failure",
           _1: [
             "Demo_test.res",
-            1418,
+            1387,
             12
           ],
           Error: new Error()
@@ -1418,7 +1387,7 @@ function blendColors(color1, color2, factor) {
           RE_EXN_ID: "Assert_failure",
           _1: [
             "Demo_test.res",
-            1422,
+            1391,
             12
           ],
           Error: new Error()
@@ -1432,7 +1401,7 @@ function blendColors(color1, color2, factor) {
           RE_EXN_ID: "Assert_failure",
           _1: [
             "Demo_test.res",
-            1426,
+            1395,
             12
           ],
           Error: new Error()
@@ -1446,7 +1415,7 @@ function blendColors(color1, color2, factor) {
           RE_EXN_ID: "Assert_failure",
           _1: [
             "Demo_test.res",
-            1430,
+            1399,
             12
           ],
           Error: new Error()
@@ -1460,7 +1429,7 @@ function blendColors(color1, color2, factor) {
           RE_EXN_ID: "Assert_failure",
           _1: [
             "Demo_test.res",
-            1434,
+            1403,
             12
           ],
           Error: new Error()
@@ -1474,7 +1443,7 @@ function blendColors(color1, color2, factor) {
           RE_EXN_ID: "Assert_failure",
           _1: [
             "Demo_test.res",
-            1438,
+            1407,
             12
           ],
           Error: new Error()
@@ -1491,7 +1460,7 @@ if (blendColors("#FF0088", "#FF0088", 0) !== "#ff0088") {
         RE_EXN_ID: "Assert_failure",
         _1: [
           "Demo_test.res",
-          1463,
+          1432,
           0
         ],
         Error: new Error()
@@ -1503,7 +1472,7 @@ if (blendColors("#000000", "#FF0088", 0) !== "#ff0088") {
         RE_EXN_ID: "Assert_failure",
         _1: [
           "Demo_test.res",
-          1464,
+          1433,
           0
         ],
         Error: new Error()
@@ -1515,7 +1484,7 @@ if (blendColors("#000000", "#FF0088", 1) !== "#000000") {
         RE_EXN_ID: "Assert_failure",
         _1: [
           "Demo_test.res",
-          1465,
+          1434,
           0
         ],
         Error: new Error()
@@ -1527,7 +1496,7 @@ if (blendColors("#000000", "#FF0088", 0.5) !== "#7f0044") {
         RE_EXN_ID: "Assert_failure",
         _1: [
           "Demo_test.res",
-          1466,
+          1435,
           0
         ],
         Error: new Error()
@@ -1561,7 +1530,7 @@ function drawRibbon2(ctx, bounds, blockType, value, hitAnimTimer, counter, setHi
                 RE_EXN_ID: "Assert_failure",
                 _1: [
                   "Demo_test.res",
-                  1538,
+                  1507,
                   8
                 ],
                 Error: new Error()
@@ -1652,7 +1621,7 @@ function randomWeighted(blockTypeWeights) {
           RE_EXN_ID: "Assert_failure",
           _1: [
             "Demo_test.res",
-            1627,
+            1596,
             52
           ],
           Error: new Error()
@@ -1752,12 +1721,58 @@ function getRandomBlockType2(currentLevel) {
         RE_EXN_ID: "Assert_failure",
         _1: [
           "Demo_test.res",
-          1658,
+          1627,
           12
         ],
         Error: new Error()
       };
 }
+
+function   drawRemoveEffect2(x, y, context, BALL_RADIUS) {
+        const ctx = context;
+        ctx.save();
+        ctx.strokeStyle = '#f1c40f';
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        ctx.arc(x, y, BALL_RADIUS, 0, Math.PI * 2);
+        ctx.stroke();
+        ctx.restore();
+    }
+;
+
+function  drawPlusEffect2(x, y, value, context, BALL_RADIUS) {
+        const ctx = context;
+        ctx.save();
+        ctx.strokeStyle = '#9ACD32'; // Yellow-green for Plus effect
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        ctx.arc(x, y, BALL_RADIUS * 2, 0, Math.PI * 2);
+        ctx.stroke();
+        ctx.fillStyle = '#9ACD32';
+        ctx.font = 'bold 20px Arial';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillText("+" + value, x, y);
+        ctx.restore();
+    }
+;
+
+function  drawMultiplyEffect2(x, y, value, context, BALL_RADIUS) {
+        const ctx = context;
+        ctx.save();
+        ctx.strokeStyle = '#27ae60';
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        ctx.arc(x, y, BALL_RADIUS * 2, 0, Math.PI * 2);
+        ctx.stroke();
+        ctx.fillStyle = '#27ae60';
+        ctx.font = 'bold 20px Arial';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillText("x" + value, x, y);
+        ctx.restore();
+    }
+;
 
 if (typeof window === "object") {
   window.onload = (function () {

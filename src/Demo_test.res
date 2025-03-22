@@ -696,44 +696,13 @@ class PhysicsGame {
         }
     }
     drawMultiplyEffect(x, y, value = 2) {
-        const ctx = this.render.context;
-        ctx.save();
-        ctx.strokeStyle = '#27ae60';
-        ctx.lineWidth = 2;
-        ctx.beginPath();
-        ctx.arc(x, y, this.BALL_RADIUS * 2, 0, Math.PI * 2);
-        ctx.stroke();
-        ctx.fillStyle = '#27ae60';
-        ctx.font = 'bold 20px Arial';
-        ctx.textAlign = 'center';
-        ctx.textBaseline = 'middle';
-        ctx.fillText("x" + value, x, y);
-        ctx.restore();
+        drawMultiplyEffect2(x, y, value, this.render.context, this.BALL_RADIUS);
     }
     drawPlusEffect(x, y, value = 2) {
-        const ctx = this.render.context;
-        ctx.save();
-        ctx.strokeStyle = '#9ACD32'; // Yellow-green for Plus effect
-        ctx.lineWidth = 2;
-        ctx.beginPath();
-        ctx.arc(x, y, this.BALL_RADIUS * 2, 0, Math.PI * 2);
-        ctx.stroke();
-        ctx.fillStyle = '#9ACD32';
-        ctx.font = 'bold 20px Arial';
-        ctx.textAlign = 'center';
-        ctx.textBaseline = 'middle';
-        ctx.fillText("+" + value, x, y);
-        ctx.restore();
+        drawPlusEffect2(x, y, value, this.render.context, this.BALL_RADIUS);
     }
     drawRemoveEffect(x, y) {
-        const ctx = this.render.context;
-        ctx.save();
-        ctx.strokeStyle = '#f1c40f';
-        ctx.lineWidth = 2;
-        ctx.beginPath();
-        ctx.arc(x, y, this.BALL_RADIUS, 0, Math.PI * 2);
-        ctx.stroke();
-        ctx.restore();
+        drawRemoveEffect2(x, y, this.render.context, this.BALL_RADIUS);
     }
     setupEventListeners() {
         this.canvas.addEventListener('mousemove', (event) => {
@@ -1578,7 +1547,7 @@ let drawRibbon2 = (ctx, bounds, blockType, value, hitAnimTimer, counter, setHitA
   }
 }
 
-// shit this should probably use the existing drawing logic for ribbons? think matter js has a sensors thing. 
+// shit this should probably use the existing drawing logic for ribbons? think matter js has a sensors thing.
 // shit also, the radius of the balls are not taken into account
 let isPointInRibbon2 = (x, y, blockType, bounds) => {
   switch blockType {
@@ -1658,6 +1627,55 @@ let getRandomBlockType2 = (currentLevel): blockType => {
   | None => assert(false)
   }
 }
+
+%%raw(`
+ function   drawRemoveEffect2(x, y, context, BALL_RADIUS) {
+        const ctx = context;
+        ctx.save();
+        ctx.strokeStyle = '#f1c40f';
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        ctx.arc(x, y, BALL_RADIUS, 0, Math.PI * 2);
+        ctx.stroke();
+        ctx.restore();
+    }
+
+`)
+%%raw(`
+  function  drawPlusEffect2(x, y, value, context, BALL_RADIUS) {
+        const ctx = context;
+        ctx.save();
+        ctx.strokeStyle = '#9ACD32'; // Yellow-green for Plus effect
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        ctx.arc(x, y, BALL_RADIUS * 2, 0, Math.PI * 2);
+        ctx.stroke();
+        ctx.fillStyle = '#9ACD32';
+        ctx.font = 'bold 20px Arial';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillText("+" + value, x, y);
+        ctx.restore();
+    }
+`)
+
+%%raw(`
+    function  drawMultiplyEffect2(x, y, value, context, BALL_RADIUS) {
+        const ctx = context;
+        ctx.save();
+        ctx.strokeStyle = '#27ae60';
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        ctx.arc(x, y, BALL_RADIUS * 2, 0, Math.PI * 2);
+        ctx.stroke();
+        ctx.fillStyle = '#27ae60';
+        ctx.font = 'bold 20px Arial';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillText("x" + value, x, y);
+        ctx.restore();
+    }
+`)
 
 // ---------------------------------------------
 
