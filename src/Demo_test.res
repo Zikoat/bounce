@@ -859,81 +859,25 @@ class PhysicsGame {
         requestAnimationFrame(this.gameLoop);
     };
     drawUI(ctx) {
-        ctx.save();
-        ctx.fillStyle = '#2c3e50';
-        ctx.font = 'bold 24px Arial';
-        ctx.textAlign = 'center';
-        ctx.textBaseline = 'top';
-        ctx.fillText("Level: " + this.currentLevel, this.CANVAS_WIDTH / 2, 20);
-        ctx.textAlign = 'right';
-        ctx.fillText("Balls: " + this.ballsRemaining, this.CANVAS_WIDTH - 20, 20);
-        ctx.textAlign = 'left';
-        ctx.fillText("Collected: " + this.score, 20, 20);
-        ctx.textAlign = 'right';
-        ctx.fillText("In play: " + this.balls.length, this.CANVAS_WIDTH - 20, 50);
-        // Show timeout countdown when all balls have been spawned but some are still in play
-        // Only show the countdown when there are 4 or fewer seconds remaining
-        if (this.ballsRemaining === 0 && this.balls.length > 0 && this.timeSinceLastCollection > 0) {
-            const timeLeft = Math.ceil((this.NO_COLLECTION_TIMEOUT - this.timeSinceLastCollection) / 60); // Convert to seconds
-            // Only show the countdown text when 4 or fewer seconds remain
-            if (timeLeft <= 4) {
-                ctx.textAlign = 'center';
-                ctx.fillStyle = timeLeft <= 2 ? '#e74c3c' : '#f39c12'; // Red when < 2 seconds, orange otherwise
-                ctx.fillText("Next level in: " + timeLeft + "s", this.CANVAS_WIDTH / 2, 50);
-            }
-        }
-        if (this.levelCompleteTimer > 0) {
-            const alpha = Math.min(1, this.levelCompleteTimer / 30);
-            ctx.fillStyle = "rgba(0, 0, 0, " + alpha * 0.7 + ")";
-            ctx.fillRect(0, 0, this.CANVAS_WIDTH, this.CANVAS_HEIGHT);
-            ctx.fillStyle = "rgba(255, 255, 255, " + alpha + ")";
-            ctx.font = 'bold 36px Arial';
-            ctx.textAlign = 'center';
-            ctx.textBaseline = 'middle';
-            // Split message by newline and display each line
-            const messageLines = this.levelCompleteMessage.split('\n');
-            messageLines.forEach((line, index) => {
-                ctx.fillText(line, this.CANVAS_WIDTH / 2, this.CANVAS_HEIGHT / 2 - 70 + (index * 40));
-            });
-            ctx.font = 'bold 24px Arial';
-            if (this.currentLevel === 1) {
-                // First level - simple message
-                ctx.fillText("Click to Start", this.CANVAS_WIDTH / 2, this.CANVAS_HEIGHT / 2 + 50);
-            }
-            else if (this.gameOver) {
-                // Game over screen
-                ctx.fillText("Click to Restart", this.CANVAS_WIDTH / 2, this.CANVAS_HEIGHT / 2 + 50);
-                // Show total score across all levels
-                ctx.font = '20px Arial';
-                ctx.fillText("Total balls collected: " + this.finalScore, this.CANVAS_WIDTH / 2, this.CANVAS_HEIGHT / 2);
-            }
-            else {
-                // Subsequent levels - show level and stats
-                ctx.fillText("Click to start Level " + this.currentLevel, this.CANVAS_WIDTH / 2, this.CANVAS_HEIGHT / 2 + 50);
-                ctx.font = '20px Arial';
-                ctx.fillText("Collected this level: " + this.score, this.CANVAS_WIDTH / 2, this.CANVAS_HEIGHT / 2 - 30);
-                ctx.fillText("Total balls for next level: " + this.initialBallCount, this.CANVAS_WIDTH / 2, this.CANVAS_HEIGHT / 2);
-            }
-            this.levelCompleteTimer--;
-        }
-        if (this.spawnActive) {
-            ctx.fillStyle = 'rgba(231, 76, 60, 0.3)';
-        }
-        else {
-            ctx.fillStyle = 'rgba(52, 152, 219, 0.5)';
-            if (this.levelCompleteTimer <= 0) {
-                ctx.font = 'bold 18px Arial';
-                ctx.textAlign = 'center';
-                ctx.textBaseline = 'bottom';
-                ctx.fillText('Click to Start', this.spawnPosition.x, this.spawnPosition.y - this.BALL_RADIUS - 5);
-            }
-        }
-        if (this.levelCompleteTimer <= 0) {
-            ctx.beginPath();
-            ctx.arc(this.spawnPosition.x, this.spawnPosition.y, this.BALL_RADIUS, 0, Math.PI * 2);
-            ctx.fill();
-        }
-        ctx.restore();
+        drawUI2(ctx, 
+        this.currentLevel, 
+        this.CANVAS_WIDTH,
+        this.ballsRemaining,
+        this.score,
+        this.balls,
+        this.timeSinceLastCollection,
+        this.NO_COLLECTION_TIMEOUT,
+        this.levelCompleteTimer,
+        this.CANVAS_HEIGHT,
+        this.levelCompleteMessage,
+        (levelCompleteTimer)=>this.levelCompleteTimer = levelCompleteTimer,
+        this.gameOver,
+        this.finalScore,
+        this.initialBallCount,
+        this.spawnActive,
+        this.spawnPosition,
+        this.BALL_RADIUS
+        )
     }
     removeRandomWalls() {
         // Only remove internal wall segments (not the outer edge walls)
@@ -1636,6 +1580,166 @@ let drawMultiplyEffect2 = (x, y, value, context, ballRadius) => {
   ctx->textAlign("center")
   ctx->textBaseline("middle")
   ctx->fillText("x" ++ value, ~x, ~y, ())
+  ctx->restore
+}
+
+let drawUI2 = (
+  ctx: myContext,
+  currentLevel,
+  canvasWidth,
+  ballsRemaining,
+  score,
+  balls,
+  timeSinceLastCollection,
+  nO_COLLECTION_TIMEOUT,
+  levelCompleteTimer,
+  canvasHeight,
+  levelCompleteMessage,
+  setLevelCompleteTimer,
+  gameOver,
+  finalScore,
+  initialBallCount,
+  spawnActive,
+  spawnPosition,
+  bALL_RADIUS,
+) => {
+  ctx->save
+  ctx->setFillStyle(String, "#2c3e50")
+  ctx->font("bold 24px Arial")
+  ctx->textAlign("center")
+  ctx->textBaseline("top")
+  ctx->fillText("Level: " ++ Belt.Int.toString(currentLevel), ~x=canvasWidth /. 2., ~y=20., ())
+  ctx->textAlign("right")
+  ctx->fillText("Balls: " ++ Belt.Int.toString(ballsRemaining), ~x=canvasWidth -. 20., ~y=20., ())
+  ctx->textAlign("left")
+  ctx->fillText("Collected: " ++ score, ~x=20., ~y=20., ())
+  ctx->textAlign("right")
+  ctx->fillText(
+    "In play: " ++ Belt.Int.toString(Array.length(balls)),
+    ~x=canvasWidth -. 20.,
+    ~y=50.,
+    (),
+  )
+
+  // Show timeout countdown when all balls have been spawned but some are still in play
+  // Only show the countdown when there are 4 or fewer seconds remaining
+  if ballsRemaining == 0 && balls->Array.length > 0 && timeSinceLastCollection > 0 {
+    let timeLeft = Math.ceil(
+      ((nO_COLLECTION_TIMEOUT :> float) -. (timeSinceLastCollection :> float)) /. 60.,
+    )
+    if timeLeft <= 4. {
+      ctx->textAlign("center")
+      let ballsRemainingTextColor = switch timeLeft {
+      | l if l <= 2. => "#e74c3c"
+      | _ => "#f39c12"
+      }
+      ctx->setFillStyle(String, ballsRemainingTextColor)
+      ctx->fillText(
+        "Next level in: " ++ Belt.Float.toString(timeLeft),
+        ~x=canvasWidth /. 2.,
+        ~y=50.,
+        (),
+      )
+    }
+  }
+
+  if levelCompleteTimer > 0 {
+    let alpha = Math.min(1., Belt.Int.toFloat(levelCompleteTimer) /. 30.)
+    ctx->setFillStyle(String, "rgba(0, 0, 0, " ++ Belt.Float.toString(alpha *. 0.7) ++ ")")
+    ctx->fillRect(~x=0., ~y=0., ~w=canvasWidth, ~h=(canvasHeight :> float))
+    ctx->setFillStyle(String, "rgba(255, 255, 255, " ++ Belt.Float.toString(alpha) ++ ")")
+    ctx->font("bold 36px Arial")
+    ctx->textAlign("center")
+    ctx->textBaseline("middle")
+    // Split message by newline and display each line
+    let messageLines = levelCompleteMessage->String.split("\n")
+    messageLines->Array.forEachWithIndex((line, index) => {
+      ctx->fillText(
+        line,
+        ~x=canvasWidth /. 2.,
+        ~y=(canvasHeight :> float) /. 2. -. 70. +. (index :> float) *. 40.,
+        (),
+      )
+    })
+    ctx->font("bold 24px Arial")
+    if currentLevel === 1 {
+      // First level - simple message
+      ctx->fillText(
+        "Click to Start",
+        ~x=canvasWidth /. 2.,
+        ~y=(canvasHeight :> float) /. 2. +. 50.,
+        (),
+      )
+    } else if gameOver {
+      // Game over screen
+      ctx->fillText(
+        "Click to Restart",
+        ~x=canvasWidth /. 2.,
+        ~y=(canvasHeight :> float) /. 2. +. 50.,
+        (),
+      )
+      // Show total score across all levels
+      ctx->font("20px Arial")
+      ctx->fillText(
+        "Total balls collected: " ++ Belt.Int.toString(finalScore),
+        ~x=canvasWidth /. 2.,
+        ~y=(canvasHeight :> float) /. 2.,
+        (),
+      )
+    } else {
+      // Subsequent levels - show level and stats
+      ctx->fillText(
+        "Click to start Level " ++ Belt.Int.toString(currentLevel),
+        ~x=canvasWidth /. 2.,
+        ~y=(canvasHeight :> float) /. 2. +. 50.,
+        (),
+      )
+      ctx->font("20px Arial")
+      ctx->fillText(
+        "Collected this level: " ++ score,
+        ~x=canvasWidth /. 2.,
+        ~y=(canvasHeight :> float) /. 2. -. 30.,
+        (),
+      )
+      ctx->fillText(
+        "Total balls for next level: " ++ Belt.Int.toString(initialBallCount),
+        ~x=canvasWidth /. 2.,
+        ~y=(canvasHeight :> float) /. 2.,
+        (),
+      )
+    }
+
+    setLevelCompleteTimer(levelCompleteTimer - 1)
+  }
+
+  if spawnActive {
+    ctx->setFillStyle(String, "rgba(231, 76, 60, 0.3)")
+  } else {
+    ctx->setFillStyle(String, "rgba(52, 152, 219, 0.5)")
+    if levelCompleteTimer <= 0 {
+      ctx->font("bold 18px Arial")
+      ctx->textAlign("center")
+      ctx->textBaseline("bottom")
+      ctx->fillText(
+        "Click to Start",
+        ~x=(spawnPosition.x :> float),
+        ~y=(spawnPosition.y - bALL_RADIUS - 5 :> float),
+        (),
+      )
+    }
+  }
+  if levelCompleteTimer <= 0 {
+    ctx->beginPath
+    ctx->arc(
+      ~x=(spawnPosition.x :> float),
+      ~y=(spawnPosition.y :> float),
+      ~r=(bALL_RADIUS :> float),
+      ~startAngle=0.,
+      ~endAngle=Math.Constants.pi *. 2.,
+      (),
+    )
+    ctx->fill
+  }
   ctx->restore
 }
 

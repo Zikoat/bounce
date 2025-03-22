@@ -850,81 +850,25 @@ class PhysicsGame {
         requestAnimationFrame(this.gameLoop);
     };
     drawUI(ctx) {
-        ctx.save();
-        ctx.fillStyle = '#2c3e50';
-        ctx.font = 'bold 24px Arial';
-        ctx.textAlign = 'center';
-        ctx.textBaseline = 'top';
-        ctx.fillText("Level: " + this.currentLevel, this.CANVAS_WIDTH / 2, 20);
-        ctx.textAlign = 'right';
-        ctx.fillText("Balls: " + this.ballsRemaining, this.CANVAS_WIDTH - 20, 20);
-        ctx.textAlign = 'left';
-        ctx.fillText("Collected: " + this.score, 20, 20);
-        ctx.textAlign = 'right';
-        ctx.fillText("In play: " + this.balls.length, this.CANVAS_WIDTH - 20, 50);
-        // Show timeout countdown when all balls have been spawned but some are still in play
-        // Only show the countdown when there are 4 or fewer seconds remaining
-        if (this.ballsRemaining === 0 && this.balls.length > 0 && this.timeSinceLastCollection > 0) {
-            const timeLeft = Math.ceil((this.NO_COLLECTION_TIMEOUT - this.timeSinceLastCollection) / 60); // Convert to seconds
-            // Only show the countdown text when 4 or fewer seconds remain
-            if (timeLeft <= 4) {
-                ctx.textAlign = 'center';
-                ctx.fillStyle = timeLeft <= 2 ? '#e74c3c' : '#f39c12'; // Red when < 2 seconds, orange otherwise
-                ctx.fillText("Next level in: " + timeLeft + "s", this.CANVAS_WIDTH / 2, 50);
-            }
-        }
-        if (this.levelCompleteTimer > 0) {
-            const alpha = Math.min(1, this.levelCompleteTimer / 30);
-            ctx.fillStyle = "rgba(0, 0, 0, " + alpha * 0.7 + ")";
-            ctx.fillRect(0, 0, this.CANVAS_WIDTH, this.CANVAS_HEIGHT);
-            ctx.fillStyle = "rgba(255, 255, 255, " + alpha + ")";
-            ctx.font = 'bold 36px Arial';
-            ctx.textAlign = 'center';
-            ctx.textBaseline = 'middle';
-            // Split message by newline and display each line
-            const messageLines = this.levelCompleteMessage.split('\n');
-            messageLines.forEach((line, index) => {
-                ctx.fillText(line, this.CANVAS_WIDTH / 2, this.CANVAS_HEIGHT / 2 - 70 + (index * 40));
-            });
-            ctx.font = 'bold 24px Arial';
-            if (this.currentLevel === 1) {
-                // First level - simple message
-                ctx.fillText("Click to Start", this.CANVAS_WIDTH / 2, this.CANVAS_HEIGHT / 2 + 50);
-            }
-            else if (this.gameOver) {
-                // Game over screen
-                ctx.fillText("Click to Restart", this.CANVAS_WIDTH / 2, this.CANVAS_HEIGHT / 2 + 50);
-                // Show total score across all levels
-                ctx.font = '20px Arial';
-                ctx.fillText("Total balls collected: " + this.finalScore, this.CANVAS_WIDTH / 2, this.CANVAS_HEIGHT / 2);
-            }
-            else {
-                // Subsequent levels - show level and stats
-                ctx.fillText("Click to start Level " + this.currentLevel, this.CANVAS_WIDTH / 2, this.CANVAS_HEIGHT / 2 + 50);
-                ctx.font = '20px Arial';
-                ctx.fillText("Collected this level: " + this.score, this.CANVAS_WIDTH / 2, this.CANVAS_HEIGHT / 2 - 30);
-                ctx.fillText("Total balls for next level: " + this.initialBallCount, this.CANVAS_WIDTH / 2, this.CANVAS_HEIGHT / 2);
-            }
-            this.levelCompleteTimer--;
-        }
-        if (this.spawnActive) {
-            ctx.fillStyle = 'rgba(231, 76, 60, 0.3)';
-        }
-        else {
-            ctx.fillStyle = 'rgba(52, 152, 219, 0.5)';
-            if (this.levelCompleteTimer <= 0) {
-                ctx.font = 'bold 18px Arial';
-                ctx.textAlign = 'center';
-                ctx.textBaseline = 'bottom';
-                ctx.fillText('Click to Start', this.spawnPosition.x, this.spawnPosition.y - this.BALL_RADIUS - 5);
-            }
-        }
-        if (this.levelCompleteTimer <= 0) {
-            ctx.beginPath();
-            ctx.arc(this.spawnPosition.x, this.spawnPosition.y, this.BALL_RADIUS, 0, Math.PI * 2);
-            ctx.fill();
-        }
-        ctx.restore();
+        drawUI2(ctx, 
+        this.currentLevel, 
+        this.CANVAS_WIDTH,
+        this.ballsRemaining,
+        this.score,
+        this.balls,
+        this.timeSinceLastCollection,
+        this.NO_COLLECTION_TIMEOUT,
+        this.levelCompleteTimer,
+        this.CANVAS_HEIGHT,
+        this.levelCompleteMessage,
+        (levelCompleteTimer)=>this.levelCompleteTimer = levelCompleteTimer,
+        this.gameOver,
+        this.finalScore,
+        this.initialBallCount,
+        this.spawnActive,
+        this.spawnPosition,
+        this.BALL_RADIUS
+        )
     }
     removeRandomWalls() {
         // Only remove internal wall segments (not the outer edge walls)
@@ -1373,7 +1317,7 @@ function blendColors(color1, color2, factor) {
           RE_EXN_ID: "Assert_failure",
           _1: [
             "Demo_test.res",
-            1387,
+            1331,
             12
           ],
           Error: new Error()
@@ -1387,7 +1331,7 @@ function blendColors(color1, color2, factor) {
           RE_EXN_ID: "Assert_failure",
           _1: [
             "Demo_test.res",
-            1391,
+            1335,
             12
           ],
           Error: new Error()
@@ -1401,7 +1345,7 @@ function blendColors(color1, color2, factor) {
           RE_EXN_ID: "Assert_failure",
           _1: [
             "Demo_test.res",
-            1395,
+            1339,
             12
           ],
           Error: new Error()
@@ -1415,7 +1359,7 @@ function blendColors(color1, color2, factor) {
           RE_EXN_ID: "Assert_failure",
           _1: [
             "Demo_test.res",
-            1399,
+            1343,
             12
           ],
           Error: new Error()
@@ -1429,7 +1373,7 @@ function blendColors(color1, color2, factor) {
           RE_EXN_ID: "Assert_failure",
           _1: [
             "Demo_test.res",
-            1403,
+            1347,
             12
           ],
           Error: new Error()
@@ -1443,7 +1387,7 @@ function blendColors(color1, color2, factor) {
           RE_EXN_ID: "Assert_failure",
           _1: [
             "Demo_test.res",
-            1407,
+            1351,
             12
           ],
           Error: new Error()
@@ -1460,7 +1404,7 @@ if (blendColors("#FF0088", "#FF0088", 0) !== "#ff0088") {
         RE_EXN_ID: "Assert_failure",
         _1: [
           "Demo_test.res",
-          1432,
+          1376,
           0
         ],
         Error: new Error()
@@ -1472,7 +1416,7 @@ if (blendColors("#000000", "#FF0088", 0) !== "#ff0088") {
         RE_EXN_ID: "Assert_failure",
         _1: [
           "Demo_test.res",
-          1433,
+          1377,
           0
         ],
         Error: new Error()
@@ -1484,7 +1428,7 @@ if (blendColors("#000000", "#FF0088", 1) !== "#000000") {
         RE_EXN_ID: "Assert_failure",
         _1: [
           "Demo_test.res",
-          1434,
+          1378,
           0
         ],
         Error: new Error()
@@ -1496,7 +1440,7 @@ if (blendColors("#000000", "#FF0088", 0.5) !== "#7f0044") {
         RE_EXN_ID: "Assert_failure",
         _1: [
           "Demo_test.res",
-          1435,
+          1379,
           0
         ],
         Error: new Error()
@@ -1530,7 +1474,7 @@ function drawRibbon2(ctx, bounds, blockType, value, hitAnimTimer, counter, setHi
                 RE_EXN_ID: "Assert_failure",
                 _1: [
                   "Demo_test.res",
-                  1487,
+                  1431,
                   8
                 ],
                 Error: new Error()
@@ -1621,7 +1565,7 @@ function randomWeighted(blockTypeWeights) {
           RE_EXN_ID: "Assert_failure",
           _1: [
             "Demo_test.res",
-            1564,
+            1508,
             52
           ],
           Error: new Error()
@@ -1721,7 +1665,7 @@ function getRandomBlockType2(currentLevel) {
         RE_EXN_ID: "Assert_failure",
         _1: [
           "Demo_test.res",
-          1595,
+          1539,
           12
         ],
         Error: new Error()
@@ -1768,6 +1712,76 @@ function drawMultiplyEffect2(x, y, value, context, ballRadius) {
   context.restore();
 }
 
+function drawUI2(ctx, currentLevel, canvasWidth, ballsRemaining, score, balls, timeSinceLastCollection, nO_COLLECTION_TIMEOUT, levelCompleteTimer, canvasHeight, levelCompleteMessage, setLevelCompleteTimer, gameOver, finalScore, initialBallCount, spawnActive, spawnPosition, bALL_RADIUS) {
+  ctx.save();
+  ctx.fillStyle = "#2c3e50";
+  ctx.font = "bold 24px Arial";
+  ctx.textAlign = "center";
+  ctx.textBaseline = "top";
+  ctx.fillText("Level: " + String(currentLevel), canvasWidth / 2, 20, undefined);
+  ctx.textAlign = "right";
+  ctx.fillText("Balls: " + String(ballsRemaining), canvasWidth - 20, 20, undefined);
+  ctx.textAlign = "left";
+  ctx.fillText("Collected: " + score, 20, 20, undefined);
+  ctx.textAlign = "right";
+  ctx.fillText("In play: " + String(balls.length), canvasWidth - 20, 50, undefined);
+  if (ballsRemaining === 0 && balls.length > 0 && timeSinceLastCollection > 0) {
+    var timeLeft = Math.ceil((nO_COLLECTION_TIMEOUT - timeSinceLastCollection) / 60);
+    if (timeLeft <= 4) {
+      ctx.textAlign = "center";
+      var ballsRemainingTextColor = timeLeft <= 2 ? "#e74c3c" : "#f39c12";
+      ctx.fillStyle = ballsRemainingTextColor;
+      ctx.fillText("Next level in: " + String(timeLeft), canvasWidth / 2, 50, undefined);
+    }
+    
+  }
+  if (levelCompleteTimer > 0) {
+    var alpha = Math.min(1, levelCompleteTimer / 30);
+    ctx.fillStyle = "rgba(0, 0, 0, " + String(alpha * 0.7) + ")";
+    ctx.fillRect(0, 0, canvasWidth, canvasHeight);
+    ctx.fillStyle = "rgba(255, 255, 255, " + String(alpha) + ")";
+    ctx.font = "bold 36px Arial";
+    ctx.textAlign = "center";
+    ctx.textBaseline = "middle";
+    var messageLines = levelCompleteMessage.split("\n");
+    messageLines.forEach(function (line, index) {
+          ctx.fillText(line, canvasWidth / 2, canvasHeight / 2 - 70 + index * 40, undefined);
+        });
+    ctx.font = "bold 24px Arial";
+    if (currentLevel === 1) {
+      ctx.fillText("Click to Start", canvasWidth / 2, canvasHeight / 2 + 50, undefined);
+    } else if (gameOver) {
+      ctx.fillText("Click to Restart", canvasWidth / 2, canvasHeight / 2 + 50, undefined);
+      ctx.font = "20px Arial";
+      ctx.fillText("Total balls collected: " + String(finalScore), canvasWidth / 2, canvasHeight / 2, undefined);
+    } else {
+      ctx.fillText("Click to start Level " + String(currentLevel), canvasWidth / 2, canvasHeight / 2 + 50, undefined);
+      ctx.font = "20px Arial";
+      ctx.fillText("Collected this level: " + score, canvasWidth / 2, canvasHeight / 2 - 30, undefined);
+      ctx.fillText("Total balls for next level: " + String(initialBallCount), canvasWidth / 2, canvasHeight / 2, undefined);
+    }
+    setLevelCompleteTimer(levelCompleteTimer - 1 | 0);
+  }
+  if (spawnActive) {
+    ctx.fillStyle = "rgba(231, 76, 60, 0.3)";
+  } else {
+    ctx.fillStyle = "rgba(52, 152, 219, 0.5)";
+    if (levelCompleteTimer <= 0) {
+      ctx.font = "bold 18px Arial";
+      ctx.textAlign = "center";
+      ctx.textBaseline = "bottom";
+      ctx.fillText("Click to Start", spawnPosition.x, (spawnPosition.y - bALL_RADIUS | 0) - 5 | 0, undefined);
+    }
+    
+  }
+  if (levelCompleteTimer <= 0) {
+    ctx.beginPath();
+    ctx.arc(spawnPosition.x, spawnPosition.y, bALL_RADIUS, 0, Math.PI * 2, undefined);
+    ctx.fill();
+  }
+  ctx.restore();
+}
+
 if (typeof window === "object") {
   window.onload = (function () {
       new PhysicsGame();
@@ -1786,5 +1800,6 @@ export {
   drawRemoveEffect2 ,
   drawPlusEffect2 ,
   drawMultiplyEffect2 ,
+  drawUI2 ,
 }
 /*  Not a pure module */
