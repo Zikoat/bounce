@@ -1,5 +1,5 @@
 // open Webapi.Canvas
-// open Webapi.Canvas.Canvas2d
+open Webapi.Canvas.Canvas2d
 // open Webapi.Dom
 
 Console.log("Hello, world!")
@@ -1437,7 +1437,7 @@ assert(blendColors("#000000", "#FF0088", 0.5) == "#7f0044")
 type point = {x: int, y: int}
 type bounds = {min: point, max: point}
 
-type myContext = Webapi.Canvas.Canvas2d.t
+type myContext = t
 
 let drawRibbon2 = (ctx, bounds, blockType, value, hitAnimTimer, counter, setHitAnimTimer) => {
   let ribbonHeight = Belt.Float.fromInt(bounds.max.y - bounds.min.y) /. 3.
@@ -1448,48 +1448,28 @@ let drawRibbon2 = (ctx, bounds, blockType, value, hitAnimTimer, counter, setHitA
   // shit, maybe extract ribbon drawing to a function
   switch blockType {
   | Multiply => {
-      ctx->Webapi.Canvas.Canvas2d.save
-      ctx->Webapi.Canvas.Canvas2d.setFillStyle(String, "rgba(39, 174, 96, 0.3)")
-      ctx->Webapi.Canvas.Canvas2d.fillRect(
-        ~x=Belt.Int.toFloat(bounds.min.x),
-        ~y=ribbonY,
-        ~w=ribbonWidth,
-        ~h=ribbonHeight,
-      )
-      ctx->Webapi.Canvas.Canvas2d.setFillStyle(String, "#27ae60")
-      ctx->Webapi.Canvas.Canvas2d.font("bold 20px Arial")
-      ctx->Webapi.Canvas.Canvas2d.textAlign("center")
-      ctx->Webapi.Canvas.Canvas2d.textBaseline("middle")
-      ctx->Webapi.Canvas.Canvas2d.fillText(
-        "x" ++ value,
-        ~x=centerX,
-        ~y=ribbonY +. ribbonHeight /. 2.,
-        (),
-      )
-      ctx->Webapi.Canvas.Canvas2d.restore
+      ctx->save
+      ctx->setFillStyle(String, "rgba(39, 174, 96, 0.3)")
+      ctx->fillRect(~x=Belt.Int.toFloat(bounds.min.x), ~y=ribbonY, ~w=ribbonWidth, ~h=ribbonHeight)
+      ctx->setFillStyle(String, "#27ae60")
+      ctx->font("bold 20px Arial")
+      ctx->textAlign("center")
+      ctx->textBaseline("middle")
+      ctx->fillText("x" ++ value, ~x=centerX, ~y=ribbonY +. ribbonHeight /. 2., ())
+      ctx->restore
     }
   | Plus => {
-      ctx->Webapi.Canvas.Canvas2d.save
+      ctx->save
 
       // Green-yellowish hue for Plus blocks
-      ctx->Webapi.Canvas.Canvas2d.setFillStyle(String, "rgba(160, 200, 60, 0.3)")
-      ctx->Webapi.Canvas.Canvas2d.fillRect(
-        ~x=Belt.Int.toFloat(bounds.min.x),
-        ~y=ribbonY,
-        ~w=ribbonWidth,
-        ~h=ribbonHeight,
-      )
-      ctx->Webapi.Canvas.Canvas2d.setFillStyle(String, "#9ACD32")
-      ctx->Webapi.Canvas.Canvas2d.font("bold 20px Arial")
-      ctx->Webapi.Canvas.Canvas2d.textAlign("center")
-      ctx->Webapi.Canvas.Canvas2d.textBaseline("middle")
-      ctx->Webapi.Canvas.Canvas2d.fillText(
-        "+" ++ value,
-        ~x=centerX,
-        ~y=ribbonY +. ribbonHeight /. 2.,
-        (),
-      )
-      ctx->Webapi.Canvas.Canvas2d.restore
+      ctx->setFillStyle(String, "rgba(160, 200, 60, 0.3)")
+      ctx->fillRect(~x=Belt.Int.toFloat(bounds.min.x), ~y=ribbonY, ~w=ribbonWidth, ~h=ribbonHeight)
+      ctx->setFillStyle(String, "#9ACD32")
+      ctx->font("bold 20px Arial")
+      ctx->textAlign("center")
+      ctx->textBaseline("middle")
+      ctx->fillText("+" ++ value, ~x=centerX, ~y=ribbonY +. ribbonHeight /. 2., ())
+      ctx->restore
     }
   | Remove => {
       // shit i think this is just a normal null check, and we should actually make hitAnimTimer not be nullable but just int.
@@ -1512,34 +1492,22 @@ let drawRibbon2 = (ctx, bounds, blockType, value, hitAnimTimer, counter, setHitA
         setHitAnimTimer(localHitAnimTimer - 1)
       }
 
-      ctx->Webapi.Canvas.Canvas2d.save
-      ctx->Webapi.Canvas.Canvas2d.setFillStyle(String, "rgba(231, 76, 60, 0.3)")
+      ctx->save
+      ctx->setFillStyle(String, "rgba(231, 76, 60, 0.3)")
 
-      ctx->Webapi.Canvas.Canvas2d.fillRect(
-        ~x=Belt.Int.toFloat(bounds.min.x),
-        ~y=ribbonY,
-        ~w=ribbonWidth,
-        ~h=ribbonHeight,
-      )
+      ctx->fillRect(~x=Belt.Int.toFloat(bounds.min.x), ~y=ribbonY, ~w=ribbonWidth, ~h=ribbonHeight)
 
       let pulseScale = 0.9 +. 0.1 *. (1. -. Belt.Float.fromInt(localHitAnimTimer) /. 10.)
       let yellowFactor: float = Belt.Float.fromInt(localHitAnimTimer) /. 10.
       let textColor = blendColors("#f1c40f", "#c0392b", yellowFactor)
 
-      ctx->Webapi.Canvas.Canvas2d.setFillStyle(String, textColor)
+      ctx->setFillStyle(String, textColor)
 
-      ctx->Webapi.Canvas.Canvas2d.font(
-        "bold " ++ Belt.Float.toString(24. *. pulseScale) ++ "px Arial",
-      )
-      ctx->Webapi.Canvas.Canvas2d.textAlign("center")
-      ctx->Webapi.Canvas.Canvas2d.textBaseline("middle")
-      ctx->Webapi.Canvas.Canvas2d.fillText(
-        "-" ++ counter,
-        ~x=centerX,
-        ~y=ribbonY +. ribbonHeight /. 2.,
-        (),
-      )
-      ctx->Webapi.Canvas.Canvas2d.restore
+      ctx->font("bold " ++ Belt.Float.toString(24. *. pulseScale) ++ "px Arial")
+      ctx->textAlign("center")
+      ctx->textBaseline("middle")
+      ctx->fillText("-" ++ counter, ~x=centerX, ~y=ribbonY +. ribbonHeight /. 2., ())
+      ctx->restore
     }
   | Diagonal
   | Chevron
@@ -1628,54 +1596,48 @@ let getRandomBlockType2 = (currentLevel): blockType => {
   }
 }
 
-%%raw(`
- function   drawRemoveEffect2(x, y, context, BALL_RADIUS) {
-        const ctx = context;
-        ctx.save();
-        ctx.strokeStyle = '#f1c40f';
-        ctx.lineWidth = 2;
-        ctx.beginPath();
-        ctx.arc(x, y, BALL_RADIUS, 0, Math.PI * 2);
-        ctx.stroke();
-        ctx.restore();
-    }
+let drawRemoveEffect2 = (x, y, context, ballRadius) => {
+  let ctx = context
+  ctx->save
+  ctx->setStrokeStyle(String, "#f1c40f")
+  ctx->lineWidth(2.)
+  ctx->beginPath
+  ctx->arc(~x, ~y, ~r=ballRadius, ~startAngle=0., ~endAngle=Math.Constants.pi *. 2., ())
+  ctx->stroke
+  ctx->restore
+}
 
-`)
-%%raw(`
-  function  drawPlusEffect2(x, y, value, context, BALL_RADIUS) {
-        const ctx = context;
-        ctx.save();
-        ctx.strokeStyle = '#9ACD32'; // Yellow-green for Plus effect
-        ctx.lineWidth = 2;
-        ctx.beginPath();
-        ctx.arc(x, y, BALL_RADIUS * 2, 0, Math.PI * 2);
-        ctx.stroke();
-        ctx.fillStyle = '#9ACD32';
-        ctx.font = 'bold 20px Arial';
-        ctx.textAlign = 'center';
-        ctx.textBaseline = 'middle';
-        ctx.fillText("+" + value, x, y);
-        ctx.restore();
-    }
-`)
+let drawPlusEffect2 = (x, y, value, context, ballRadius) => {
+  let ctx = context
+  ctx->save
+  ctx->setStrokeStyle(String, "#9ACD32")
+  ctx->lineWidth(2.)
+  ctx->beginPath
+  ctx->arc(~x, ~y, ~r=ballRadius, ~startAngle=0., ~endAngle=Math.Constants.pi *. 2., ())
+  ctx->stroke
+  ctx->setFillStyle(String, "#9ACD32")
+  ctx->font("bold 20px Arial")
+  ctx->textAlign("center")
+  ctx->textBaseline("middle")
+  ctx->fillText("+" ++ value, ~x, ~y, ())
+  ctx->restore
+}
 
-%%raw(`
-    function  drawMultiplyEffect2(x, y, value, context, BALL_RADIUS) {
-        const ctx = context;
-        ctx.save();
-        ctx.strokeStyle = '#27ae60';
-        ctx.lineWidth = 2;
-        ctx.beginPath();
-        ctx.arc(x, y, BALL_RADIUS * 2, 0, Math.PI * 2);
-        ctx.stroke();
-        ctx.fillStyle = '#27ae60';
-        ctx.font = 'bold 20px Arial';
-        ctx.textAlign = 'center';
-        ctx.textBaseline = 'middle';
-        ctx.fillText("x" + value, x, y);
-        ctx.restore();
-    }
-`)
+let drawMultiplyEffect2 = (x, y, value, context, ballRadius) => {
+  let ctx = context
+  ctx->save
+  ctx->setStrokeStyle(String, "#27ae60")
+  ctx->lineWidth(2.)
+  ctx->beginPath
+  ctx->arc(~x, ~y, ~r=ballRadius *. 2., ~startAngle=0., ~endAngle=Math.Constants.pi *. 2., ())
+  ctx->stroke
+  ctx->setFillStyle(String, "#27ae60")
+  ctx->font("bold 20px Arial")
+  ctx->textAlign("center")
+  ctx->textBaseline("middle")
+  ctx->fillText("x" ++ value, ~x, ~y, ())
+  ctx->restore
+}
 
 // ---------------------------------------------
 

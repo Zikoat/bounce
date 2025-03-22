@@ -1530,7 +1530,7 @@ function drawRibbon2(ctx, bounds, blockType, value, hitAnimTimer, counter, setHi
                 RE_EXN_ID: "Assert_failure",
                 _1: [
                   "Demo_test.res",
-                  1507,
+                  1487,
                   8
                 ],
                 Error: new Error()
@@ -1621,7 +1621,7 @@ function randomWeighted(blockTypeWeights) {
           RE_EXN_ID: "Assert_failure",
           _1: [
             "Demo_test.res",
-            1596,
+            1564,
             52
           ],
           Error: new Error()
@@ -1721,58 +1721,52 @@ function getRandomBlockType2(currentLevel) {
         RE_EXN_ID: "Assert_failure",
         _1: [
           "Demo_test.res",
-          1627,
+          1595,
           12
         ],
         Error: new Error()
       };
 }
 
-function   drawRemoveEffect2(x, y, context, BALL_RADIUS) {
-        const ctx = context;
-        ctx.save();
-        ctx.strokeStyle = '#f1c40f';
-        ctx.lineWidth = 2;
-        ctx.beginPath();
-        ctx.arc(x, y, BALL_RADIUS, 0, Math.PI * 2);
-        ctx.stroke();
-        ctx.restore();
-    }
-;
+function drawRemoveEffect2(x, y, context, ballRadius) {
+  context.save();
+  context.strokeStyle = "#f1c40f";
+  context.lineWidth = 2;
+  context.beginPath();
+  context.arc(x, y, ballRadius, 0, Math.PI * 2, undefined);
+  context.stroke();
+  context.restore();
+}
 
-function  drawPlusEffect2(x, y, value, context, BALL_RADIUS) {
-        const ctx = context;
-        ctx.save();
-        ctx.strokeStyle = '#9ACD32'; // Yellow-green for Plus effect
-        ctx.lineWidth = 2;
-        ctx.beginPath();
-        ctx.arc(x, y, BALL_RADIUS * 2, 0, Math.PI * 2);
-        ctx.stroke();
-        ctx.fillStyle = '#9ACD32';
-        ctx.font = 'bold 20px Arial';
-        ctx.textAlign = 'center';
-        ctx.textBaseline = 'middle';
-        ctx.fillText("+" + value, x, y);
-        ctx.restore();
-    }
-;
+function drawPlusEffect2(x, y, value, context, ballRadius) {
+  context.save();
+  context.strokeStyle = "#9ACD32";
+  context.lineWidth = 2;
+  context.beginPath();
+  context.arc(x, y, ballRadius, 0, Math.PI * 2, undefined);
+  context.stroke();
+  context.fillStyle = "#9ACD32";
+  context.font = "bold 20px Arial";
+  context.textAlign = "center";
+  context.textBaseline = "middle";
+  context.fillText("+" + value, x, y, undefined);
+  context.restore();
+}
 
-function  drawMultiplyEffect2(x, y, value, context, BALL_RADIUS) {
-        const ctx = context;
-        ctx.save();
-        ctx.strokeStyle = '#27ae60';
-        ctx.lineWidth = 2;
-        ctx.beginPath();
-        ctx.arc(x, y, BALL_RADIUS * 2, 0, Math.PI * 2);
-        ctx.stroke();
-        ctx.fillStyle = '#27ae60';
-        ctx.font = 'bold 20px Arial';
-        ctx.textAlign = 'center';
-        ctx.textBaseline = 'middle';
-        ctx.fillText("x" + value, x, y);
-        ctx.restore();
-    }
-;
+function drawMultiplyEffect2(x, y, value, context, ballRadius) {
+  context.save();
+  context.strokeStyle = "#27ae60";
+  context.lineWidth = 2;
+  context.beginPath();
+  context.arc(x, y, ballRadius * 2, 0, Math.PI * 2, undefined);
+  context.stroke();
+  context.fillStyle = "#27ae60";
+  context.font = "bold 20px Arial";
+  context.textAlign = "center";
+  context.textBaseline = "middle";
+  context.fillText("x" + value, x, y, undefined);
+  context.restore();
+}
 
 if (typeof window === "object") {
   window.onload = (function () {
@@ -1789,5 +1783,8 @@ export {
   randomWeighted ,
   results ,
   getRandomBlockType2 ,
+  drawRemoveEffect2 ,
+  drawPlusEffect2 ,
+  drawMultiplyEffect2 ,
 }
 /*  Not a pure module */
