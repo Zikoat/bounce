@@ -1801,26 +1801,22 @@ function createLanes2(canvasWidth, canvasHeight, laneCount, blockCount, wallStar
 }
 
 function removeWallSegment2(laneIndex, blockIndex, getVerticalWallSegments, world, walls, setWalls) {
-        if (laneIndex < 0 || laneIndex >= getVerticalWallSegments().length) {
-            return;
-        }
-        const laneSegments = getVerticalWallSegments()[laneIndex];
-        if (!laneSegments || blockIndex < 0 || blockIndex >= laneSegments.length) {
-            return;
-        }
-        const blockSegments = laneSegments[blockIndex];
-        if (!blockSegments || blockSegments.length === 0) {
-            return;
-        }
-        for (const wallSegment of [...blockSegments]) {
-            setWalls(walls.filter(wall => wall !== wallSegment));
-            worldRemove(world, wallSegment);
-        }
-        if (getVerticalWallSegments()[laneIndex] && getVerticalWallSegments()[laneIndex][blockIndex]) {
-            getVerticalWallSegments()[laneIndex][blockIndex] = [];
-        }
-    }
-;
+  var laneSegments = getVerticalWallSegments()[laneIndex];
+  if (laneSegments === undefined) {
+    return ;
+  }
+  var blockSegments = laneSegments[blockIndex];
+  if (blockSegments !== undefined) {
+    blockSegments.forEach(function (wallSegment) {
+          setWalls(walls.filter(function (wall) {
+                    return wall !== wallSegment;
+                  }));
+          Matter.World.remove(world, wallSegment);
+        });
+    return ;
+  }
+  
+}
 
 if (typeof window === "object") {
   window.onload = (function () {
@@ -1845,5 +1841,6 @@ export {
   drawChevronForBlock2 ,
   worldRemove ,
   createLanes2 ,
+  removeWallSegment2 ,
 }
 /*  Not a pure module */

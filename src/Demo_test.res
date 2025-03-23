@@ -1816,28 +1816,29 @@ let createLanes2 = (
   }
 }
 
-%%raw(`
-    function removeWallSegment2(laneIndex, blockIndex, getVerticalWallSegments, world, walls, setWalls) {
-        if (laneIndex < 0 || laneIndex >= getVerticalWallSegments().length) {
-            return;
-        }
-        const laneSegments = getVerticalWallSegments()[laneIndex];
-        if (!laneSegments || blockIndex < 0 || blockIndex >= laneSegments.length) {
-            return;
-        }
-        const blockSegments = laneSegments[blockIndex];
-        if (!blockSegments || blockSegments.length === 0) {
-            return;
-        }
-        for (const wallSegment of [...blockSegments]) {
-            setWalls(walls.filter(wall => wall !== wallSegment));
-            worldRemove(world, wallSegment);
-        }
-        if (getVerticalWallSegments()[laneIndex] && getVerticalWallSegments()[laneIndex][blockIndex]) {
-            getVerticalWallSegments()[laneIndex][blockIndex] = [];
-        }
+let removeWallSegment2 = (
+  laneIndex,
+  blockIndex,
+  getVerticalWallSegments: unit => array<array<array<Bodies.body>>>,
+  world,
+  walls,
+  setWalls,
+) => {
+  let laneSegments = getVerticalWallSegments()[laneIndex]
+  switch laneSegments {
+  | Some(laneSegments) =>
+    let blockSegments = laneSegments[blockIndex]
+    switch blockSegments {
+    | Some(blockSegments) =>
+      blockSegments->Array.forEach(wallSegment => {
+        setWalls(walls->Array.filter(wall => wall !== wallSegment))
+        let _ = worldRemove(world, wallSegment)
+      })
+    | None => ()
     }
-`)
+  | None => ()
+  }
+}
 
 // ---------------------------------------------
 
