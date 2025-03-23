@@ -274,13 +274,13 @@ class PhysicsGame {
                 if (!block)
                     continue;
                 if (block.body) {
-                    World.remove(this.engine.world, block.body);
+                    worldRemove(this.engine.world, block.body);
                 }
                 if (block.diagonalWall) {
-                    World.remove(this.engine.world, block.diagonalWall);
+                    worldRemove(this.engine.world, block.diagonalWall);
                 }
                 if (block.secondaryDiagonalWall) {
-                    World.remove(this.engine.world, block.secondaryDiagonalWall);
+                    worldRemove(this.engine.world, block.secondaryDiagonalWall);
                 }
             }
         }
@@ -596,7 +596,7 @@ class PhysicsGame {
         }
         for (const wallSegment of [...blockSegments]) {
             this.walls = this.walls.filter(wall => wall !== wallSegment);
-            World.remove(this.engine.world, wallSegment);
+            worldRemove(this.engine.world, wallSegment);
         }
         if (this.verticalWallSegments[laneIndex] && this.verticalWallSegments[laneIndex][blockIndex]) {
             this.verticalWallSegments[laneIndex][blockIndex] = [];
@@ -661,7 +661,7 @@ class PhysicsGame {
                 block.counter--;
                 block.justHit = true;
                 block.hitAnimTimer = 10;
-                World.remove(this.engine.world, ball);
+                worldRemove(this.engine.world, ball);
                 // Clean up the map when the ball is removed
                 this.ballToVisitedBlocks.delete(ball.id);
                 this.balls = this.balls.filter(b => b !== ball);
@@ -806,7 +806,7 @@ class PhysicsGame {
         }
         this.balls = this.balls.filter(ball => {
             if (ball.position.y > this.CANVAS_HEIGHT + this.BALL_RADIUS * 2) {
-                World.remove(this.engine.world, ball);
+                worldRemove(this.engine.world, ball);
                 this.score += 1;
                 // Clean up the map when a ball is removed
                 this.ballToVisitedBlocks.delete(ball.id);
@@ -909,7 +909,7 @@ class PhysicsGame {
         this.levelCompleteTimer = 0;
         // Clear any remaining balls
         for (const ball of [...this.balls]) {
-            World.remove(this.engine.world, ball);
+            worldRemove(this.engine.world, ball);
         }
         this.balls = [];
         // Clear the visited blocks map
@@ -980,7 +980,7 @@ class PhysicsGame {
                 else if (block.type2 === "Remove" && collisionDetected) {
                     block.counter--;
                     block.hitAnimTimer = 10;
-                    World.remove(this.engine.world, ball);
+                    worldRemove(this.engine.world, ball);
                     // Clean up the map when the ball is removed
                     this.ballToVisitedBlocks.delete(ball.id);
                     this.balls = this.balls.filter(b => b !== ball);
@@ -1084,7 +1084,7 @@ class PhysicsGame {
         this.finalScore = this.initialBallCount;
         // Clear any remaining balls
         for (const ball of [...this.balls]) {
-            World.remove(this.engine.world, ball);
+            worldRemove(this.engine.world, ball);
         }
         this.balls = [];
         // Clear the visited blocks map
@@ -1108,11 +1108,11 @@ class PhysicsGame {
     createChevronWall(block, laneIndex, blockIndex) {
         // First, make sure we clean up any existing walls to prevent duplicates
         if (block.diagonalWall) {
-            World.remove(this.engine.world, block.diagonalWall);
+            worldRemove(this.engine.world, block.diagonalWall);
             block.diagonalWall = null;
         }
         if (block.secondaryDiagonalWall) {
-            World.remove(this.engine.world, block.secondaryDiagonalWall);
+            worldRemove(this.engine.world, block.secondaryDiagonalWall);
             block.secondaryDiagonalWall = null;
         }
         // For chevron blocks, we don't need direction but for consistency with diagonal blocks
@@ -1233,7 +1233,7 @@ class PhysicsGame {
                 (body.label.startsWith('chevronWallLeft_') || body.label.startsWith('chevronWallRight_')) &&
                 !validChevronArmIds.has(body.id)) {
                 // This is a stray chevron arm, remove it
-                World.remove(this.engine.world, body);
+                worldRemove(this.engine.world, body);
                 console.log("Removed stray chevron arm:", body.label);
             }
         }
@@ -1807,6 +1807,10 @@ function drawChevronForBlock2(block, ctx, dIAGONAL_THICKNESS) {
   ctx.restore();
 }
 
+function worldRemove(world, body) {
+  return Matter.World.remove(world, body);
+}
+
 if (typeof window === "object") {
   window.onload = (function () {
       new PhysicsGame();
@@ -1828,5 +1832,6 @@ export {
   drawUI2 ,
   lineSegmentIntersectsRibbon2 ,
   drawChevronForBlock2 ,
+  worldRemove ,
 }
 /*  Not a pure module */
