@@ -11,7 +11,7 @@ const { Engine, Render, World, Bodies, Body, Runner } = Matter;
 
 class Block {
     body = null;
-    type;
+    type2;
     value;
     counter;
     bounds;
@@ -20,10 +20,10 @@ class Block {
     diagonalWall = null;
     diagonalDirection = null;
     secondaryDiagonalWall = null;
-    constructor(x, y, width, height, type = "Empty", multiplyValue = 0) {
-        this.type = type;
+    constructor(x, y, width, height, type2 = "Empty", multiplyValue = 0) {
+        this.type2 = type2;
         // For Multiply blocks, use the provided multiplyValue or generate a random one between 2-5
-        if (type === "Multiply") {
+        if (type2 === "Multiply") {
             if (multiplyValue >= 2 && multiplyValue <= 5) {
                 this.value = multiplyValue;
             }
@@ -33,7 +33,7 @@ class Block {
             }
         }
         // For Plus blocks, generate a random value between 2-5
-        else if (type === "Plus") {
+        else if (type2 === "Plus") {
             // Generate a random value: 5 to 20
             this.value = Math.floor(Math.random() * 16) + 5;
             console.log("Created Plus block with value:", this.value);
@@ -42,7 +42,7 @@ class Block {
             this.value = 0;
         }
         // For Remove blocks, generate a random counter between 5 and 50
-        if (type === "Remove") {
+        if (type2 === "Remove") {
             this.counter = Math.floor(Math.random() * 46) + 5; // Random value between 5 and 50
             console.log("Created Remove block with counter:", this.counter);
         }
@@ -53,9 +53,9 @@ class Block {
             min: { x: x - width / 2, y: y - height / 2 },
             max: { x: x + width / 2, y: y + height / 2 }
         };
-        if (type !== "Multiply" && type !== "Remove" &&
-            type !== "Diagonal" && type !== "Plus" &&
-            type !== "Chevron") {
+        if (type2 !== "Multiply" && type2 !== "Remove" &&
+            type2 !== "Diagonal" && type2 !== "Plus" &&
+            type2 !== "Chevron") {
             this.body = Bodies.rectangle(x, y, width, height, {
                 isStatic: true,
                 render: {
@@ -65,25 +65,25 @@ class Block {
             '';
             this.body.label = 'block';
         }
-        else if (type === "Diagonal") {
+        else if (type2 === "Diagonal") {
             this.diagonalDirection = Math.random() < 0.5 ? 'leftToRight' : 'rightToLeft';
         }
         // For debugging: check if block types have a body set
-        if (type === "Plus") {
+        if (type2 === "Plus") {
             console.log("Plus block body set to:", this.body ? "has body" : "null");
         }
     }
     getFillStyle() {
-        return getFillStyle(this.type);
+        return getFillStyle(this.type2);
     }
     drawRibbon(ctx) {
         const setHitAnimTimer = (hitAnimTimer) => {
             this.hitAnimTimer = hitAnimTimer;
         }
-        drawRibbon2(ctx, this.bounds, this.type, this.value, this.hitAnimTimer, this.counter, setHitAnimTimer)
+        drawRibbon2(ctx, this.bounds, this.type2, this.value, this.hitAnimTimer, this.counter, setHitAnimTimer)
     }
     isPointInRibbon(x, y) {
-        return isPointInRibbon2(x, y, this.type, this.bounds)
+        return isPointInRibbon2(x, y, this.type2, this.bounds)
         
     }
 
@@ -245,20 +245,20 @@ class PhysicsGame {
                 if (!blockLayout[laneIndex]) {
                     throw new Error("Lane " + laneIndex + " is undefined in blockLayout");
                 }
-                const type = blockLayout[laneIndex][blockIndex];
-                if (type === undefined) {
+                const type2 = blockLayout[laneIndex][blockIndex];
+                if (type2 === undefined) {
                     throw new Error("Block type at [" + laneIndex + "][" + blockIndex + "] is undefined");
                 }
-                const block = new Block(laneX, blockY, blockWidth, blockHeight, type);
+                const block = new Block(laneX, blockY, blockWidth, blockHeight, type2);
                 laneArray.push(block);
-                if (block.type !== "Empty" && block.type !== "Multiply" &&
-                    block.type !== "Remove" && block.body !== null) {
+                if (block.type2 !== "Empty" && block.type2 !== "Multiply" &&
+                    block.type2 !== "Remove" && block.body !== null) {
                     World.add(this.engine.world, block.body);
                 }
-                if (block.type === "Diagonal") {
+                if (block.type2 === "Diagonal") {
                     this.createDiagonalWall(block, laneIndex, blockIndex);
                 }
-                if (block.type === "Chevron") {
+                if (block.type2 === "Chevron") {
                     this.createChevronWall(block, laneIndex, blockIndex);
                 }
             }
@@ -469,7 +469,7 @@ class PhysicsGame {
             if (leftLaneBlocks && Array.isArray(leftLaneBlocks) && leftLaneBlocks.length > blockIndex) {
                 const leftBlock = leftLaneBlocks[blockIndex];
                 // Check if the left block is a diagonal block with a direction
-                if (leftBlock && leftBlock.type === "Diagonal" && leftBlock.diagonalDirection) {
+                if (leftBlock && leftBlock.type2 === "Diagonal" && leftBlock.diagonalDirection) {
                     adjacentDirection = leftBlock.diagonalDirection;
                 }
             }
@@ -481,7 +481,7 @@ class PhysicsGame {
             if (rightLaneBlocks && Array.isArray(rightLaneBlocks) && rightLaneBlocks.length > blockIndex) {
                 const rightBlock = rightLaneBlocks[blockIndex];
                 // Check if the right block is a diagonal block with a direction
-                if (rightBlock && rightBlock.type === "Diagonal" && rightBlock.diagonalDirection) {
+                if (rightBlock && rightBlock.type2 === "Diagonal" && rightBlock.diagonalDirection) {
                     adjacentDirection = rightBlock.diagonalDirection;
                 }
             }
@@ -558,7 +558,7 @@ class PhysicsGame {
         World.add(this.engine.world, diagonalBody);
     }
     drawDiagonalForBlock(block, ctx) {
-        if (block.type !== "Diagonal" || !block.bounds) {
+        if (block.type2 !== "Diagonal" || !block.bounds) {
             return;
         }
         const minX = block.bounds.min.x;
@@ -611,7 +611,7 @@ class PhysicsGame {
             if (ball && blockBody) {
                 const block = this.findBlockByBody(blockBody);
                 if (block && block.body) {
-                    console.log("Block collision detected in handleCollisions, block type:", block.type);
+                    console.log("Block collision detected in handleCollisions, block type:", block.type2);
                     this.handleBlockCollision(ball, block);
                 }
             }
@@ -628,7 +628,7 @@ class PhysicsGame {
         return null;
     }
     handleBlockCollision(ball, block) {
-        switch (block.type) {
+        switch (block.type2) {
             case "Multiply":
                 // Check if the ball has already visited this block
                 const visitedBlocks = this.ballToVisitedBlocks.get(ball.id);
@@ -650,7 +650,7 @@ class PhysicsGame {
                 console.log("Calling handlePlusBlock with ball id:", ball.id);
                 this.handlePlusBlock(ball, block);
                 // Remove the Plus block after it's hit by replacing it with an Empty block
-                block.type = "Empty";
+                block.type2 = "Empty";
                 block.value = 0;
                 console.log("Plus block set to empty");
                 break;
@@ -942,7 +942,7 @@ class PhysicsGame {
             laneArray.forEach((block, blockIndex) => {
                 if (!shouldContinue)
                     return;
-                if (block.type === "Remove") {
+                if (block.type2 === "Remove") {
                     const bounds = block.bounds;
                 }
                 let collisionDetected = block.isPointInRibbon(ball.position.x, ball.position.y);
@@ -954,7 +954,7 @@ class PhysicsGame {
                         collisionDetected = this.lineSegmentIntersectsRibbon(ball.position.x, ball.position.y, futureX, futureY, block);
                     }
                 }
-                if (block.type === "Multiply" &&
+                if (block.type2 === "Multiply" &&
                     !this.ballToVisitedBlocks.get(ball.id)?.has(block) &&
                     collisionDetected) {
                     // Mark this block as visited for this ball
@@ -968,16 +968,16 @@ class PhysicsGame {
                     this.handleMultiplication(ball, block);
                     shouldContinue = false;
                 }
-                else if (block.type === "Plus" && collisionDetected) {
+                else if (block.type2 === "Plus" && collisionDetected) {
                     console.log("Found Plus block in collision check, ball id:", ball.id, "collision detected:", collisionDetected);
                     this.handlePlusBlock(ball, block);
                     // Remove the Plus block after it's hit by replacing it with an Empty block
-                    block.type = "Empty";
+                    block.type2 = "Empty";
                     block.value = 0;
                     console.log("Plus block set to empty in checkRibbonCollisions");
                     shouldContinue = false;
                 }
-                else if (block.type === "Remove" && collisionDetected) {
+                else if (block.type2 === "Remove" && collisionDetected) {
                     block.counter--;
                     block.hitAnimTimer = 10;
                     World.remove(this.engine.world, ball);
@@ -1201,33 +1201,9 @@ class PhysicsGame {
         World.add(this.engine.world, [leftDiagonalBody, rightDiagonalBody]);
     }
     drawChevronForBlock(block, ctx) {
-        if (block.type !== "Chevron" || !block.bounds) {
-            return;
+        
+            drawChevronForBlock2(block, ctx, this.DIAGONAL_THICKNESS)
         }
-        const minX = block.bounds.min.x;
-        const minY = block.bounds.min.y;
-        const maxX = block.bounds.max.x;
-        const maxY = block.bounds.max.y;
-        const centerX = (minX + maxX) / 2;
-        const peakY = minY + (maxY - minY) * 0.5; // Peak is at 50% from the top (middle of the block)
-        if (!block.diagonalWall) {
-            ctx.save();
-            ctx.strokeStyle = '#95a5a6';
-            // Use consistent thickness for both sides
-            const thickness = this.DIAGONAL_THICKNESS * 1.5;
-            ctx.lineWidth = thickness;
-            // Draw both sides of the chevron
-            ctx.beginPath();
-            // Left arm
-            ctx.moveTo(minX, maxY);
-            ctx.lineTo(centerX, peakY);
-            // Right arm
-            ctx.moveTo(centerX, peakY);
-            ctx.lineTo(maxX, maxY);
-            ctx.stroke();
-            ctx.restore();
-        }
-    }
     // Method to find and clean up any stray chevron arms
     cleanupStrayChevronArms() {
         // Get all bodies in the world
@@ -1241,7 +1217,7 @@ class PhysicsGame {
             for (const block of laneArray) {
                 if (!block)
                     continue;
-                if (block.type === "Chevron") {
+                if (block.type2 === "Chevron") {
                     if (block.diagonalWall) {
                         validChevronArmIds.add(block.diagonalWall.id);
                     }
@@ -1290,7 +1266,7 @@ function blendColors(color1, color2, factor) {
           RE_EXN_ID: "Assert_failure",
           _1: [
             "Demo_test.res",
-            1304,
+            1280,
             12
           ],
           Error: new Error()
@@ -1304,7 +1280,7 @@ function blendColors(color1, color2, factor) {
           RE_EXN_ID: "Assert_failure",
           _1: [
             "Demo_test.res",
-            1308,
+            1284,
             12
           ],
           Error: new Error()
@@ -1318,7 +1294,7 @@ function blendColors(color1, color2, factor) {
           RE_EXN_ID: "Assert_failure",
           _1: [
             "Demo_test.res",
-            1312,
+            1288,
             12
           ],
           Error: new Error()
@@ -1332,7 +1308,7 @@ function blendColors(color1, color2, factor) {
           RE_EXN_ID: "Assert_failure",
           _1: [
             "Demo_test.res",
-            1316,
+            1292,
             12
           ],
           Error: new Error()
@@ -1346,7 +1322,7 @@ function blendColors(color1, color2, factor) {
           RE_EXN_ID: "Assert_failure",
           _1: [
             "Demo_test.res",
-            1320,
+            1296,
             12
           ],
           Error: new Error()
@@ -1360,7 +1336,7 @@ function blendColors(color1, color2, factor) {
           RE_EXN_ID: "Assert_failure",
           _1: [
             "Demo_test.res",
-            1324,
+            1300,
             12
           ],
           Error: new Error()
@@ -1377,7 +1353,7 @@ if (blendColors("#FF0088", "#FF0088", 0) !== "#ff0088") {
         RE_EXN_ID: "Assert_failure",
         _1: [
           "Demo_test.res",
-          1349,
+          1325,
           0
         ],
         Error: new Error()
@@ -1389,7 +1365,7 @@ if (blendColors("#000000", "#FF0088", 0) !== "#ff0088") {
         RE_EXN_ID: "Assert_failure",
         _1: [
           "Demo_test.res",
-          1350,
+          1326,
           0
         ],
         Error: new Error()
@@ -1401,7 +1377,7 @@ if (blendColors("#000000", "#FF0088", 1) !== "#000000") {
         RE_EXN_ID: "Assert_failure",
         _1: [
           "Demo_test.res",
-          1351,
+          1327,
           0
         ],
         Error: new Error()
@@ -1413,7 +1389,7 @@ if (blendColors("#000000", "#FF0088", 0.5) !== "#7f0044") {
         RE_EXN_ID: "Assert_failure",
         _1: [
           "Demo_test.res",
-          1352,
+          1328,
           0
         ],
         Error: new Error()
@@ -1447,7 +1423,7 @@ function drawRibbon2(ctx, bounds, blockType, value, hitAnimTimer, counter, setHi
                 RE_EXN_ID: "Assert_failure",
                 _1: [
                   "Demo_test.res",
-                  1404,
+                  1380,
                   8
                 ],
                 Error: new Error()
@@ -1487,18 +1463,19 @@ function drawRibbon2(ctx, bounds, blockType, value, hitAnimTimer, counter, setHi
 
 function isPointInRibbon2(x, y, blockType, bounds) {
   switch (blockType) {
-    case "Empty" :
-    case "Diagonal" :
-    case "Chevron" :
-        return false;
+    case "Multiply" :
+    case "Remove" :
+    case "Plus" :
+        break;
     default:
-      var ribbonHeight = (bounds.max.y - bounds.min.y | 0) / 3;
-      var ribbonY = (bounds.max.y + bounds.min.y | 0) / 2 - ribbonHeight / 2;
-      if (x >= bounds.min.x && x <= bounds.max.x && y >= ribbonY) {
-        return y <= ribbonY + ribbonHeight;
-      } else {
-        return false;
-      }
+      return false;
+  }
+  var ribbonHeight = (bounds.max.y - bounds.min.y | 0) / 3;
+  var ribbonY = (bounds.max.y + bounds.min.y | 0) / 2 - ribbonHeight / 2;
+  if (x >= bounds.min.x && x <= bounds.max.x && y >= ribbonY) {
+    return y <= ribbonY + ribbonHeight;
+  } else {
+    return false;
   }
 }
 
@@ -1538,7 +1515,7 @@ function randomWeighted(blockTypeWeights) {
           RE_EXN_ID: "Assert_failure",
           _1: [
             "Demo_test.res",
-            1481,
+            1457,
             52
           ],
           Error: new Error()
@@ -1638,7 +1615,7 @@ function getRandomBlockType2(currentLevel) {
         RE_EXN_ID: "Assert_failure",
         _1: [
           "Demo_test.res",
-          1512,
+          1488,
           12
         ],
         Error: new Error()
@@ -1802,6 +1779,34 @@ function lineSegmentIntersectsRibbon2(x1, y1, x2, y2, block) {
   }
 }
 
+function drawChevronForBlock2(block, ctx, dIAGONAL_THICKNESS) {
+  var match = block.type2;
+  if (match !== "Chevron") {
+    return ;
+  }
+  var minX = block.bounds.min.x;
+  var minY = block.bounds.min.y;
+  var maxX = block.bounds.max.x;
+  var maxY = block.bounds.max.y;
+  var centerX = (minX + maxX) / 2;
+  var peakY = (minY + (maxY - minY)) * 0.5;
+  var match$1 = block.diagonalWall;
+  if (match$1 !== undefined) {
+    return ;
+  }
+  ctx.save();
+  ctx.strokeStyle = "#95a5a6";
+  var thickness = dIAGONAL_THICKNESS * 1.5;
+  ctx.lineWidth = thickness;
+  ctx.beginPath();
+  ctx.moveTo(minX, maxY);
+  ctx.lineTo(centerX, peakY);
+  ctx.moveTo(centerX, peakY);
+  ctx.lineTo(maxX, maxY);
+  ctx.stroke();
+  ctx.restore();
+}
+
 if (typeof window === "object") {
   window.onload = (function () {
       new PhysicsGame();
@@ -1822,5 +1827,6 @@ export {
   drawMultiplyEffect2 ,
   drawUI2 ,
   lineSegmentIntersectsRibbon2 ,
+  drawChevronForBlock2 ,
 }
 /*  Not a pure module */
