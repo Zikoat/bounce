@@ -178,64 +178,22 @@ class PhysicsGame {
         requestAnimationFrame(this.gameLoop);
     }
     createLanes() {
-        const laneWidth = this.CANVAS_WIDTH / this.LANE_COUNT;
-        const blockHeight = (this.CANVAS_HEIGHT - this.WALL_START_Y) / this.BLOCK_COUNT * this.BLOCK_HEIGHT_RATIO;
-        this.verticalWallSegments = Array(this.LANE_COUNT + 1).fill(null).map(() => Array(this.BLOCK_COUNT).fill(null).map(() => []));
-        for (let laneIndex = 0; laneIndex <= this.LANE_COUNT; laneIndex++) {
-            const x = laneWidth * laneIndex;
-            // Add walls from top of canvas to WALL_START_Y for the leftmost and rightmost lanes
-            if (laneIndex === 0 || laneIndex === this.LANE_COUNT) {
-                // Calculate the height of the top wall section
-                const topWallHeight = this.WALL_START_Y;
-                const topWallY = topWallHeight / 2; // Center point of the wall
-                const topWall = Bodies.rectangle(x, topWallY, this.WALL_THICKNESS, topWallHeight, {
-                    isStatic: true,
-                    render: {
-                        fillStyle: '#95a5a6'
-                    }
-                });
-                topWall.label = 'wall';
-                this.walls.push(topWall);
-                World.add(this.engine.world, topWall);
-            }
-            for (let blockIndex = 0; blockIndex < this.BLOCK_COUNT; blockIndex++) {
-                // Skip creating wall segment with medium probability (45%)
-                // But always keep walls on the outer edges
-                if ((laneIndex !== 0 && laneIndex !== this.LANE_COUNT) && Math.random() < 0.45) {
-                    continue;
-                }
-                const y = this.WALL_START_Y + (blockHeight * blockIndex) + (blockHeight / 2);
-                const wallSegment = Bodies.rectangle(x, y, this.WALL_THICKNESS, blockHeight, {
-                    isStatic: true,
-                    render: {
-                        fillStyle: '#95a5a6'
-                    }
-                });
-                wallSegment.label = 'wall';
-                const blockSegments = this.verticalWallSegments[laneIndex]?.[blockIndex];
-                if (blockSegments) {
-                    blockSegments.push(wallSegment);
-                    this.walls.push(wallSegment);
-                    World.add(this.engine.world, wallSegment);
-                }
-            }
-            // Add bottom wall extensions
-            if (laneIndex === 0 || laneIndex === this.LANE_COUNT) {
-                const extraWallHeight = this.BALL_RADIUS * 3;
-                const extraWallY = this.CANVAS_HEIGHT + (extraWallHeight / 3);
-                const sideWallExtension = Bodies.rectangle(x, extraWallY, this.WALL_THICKNESS, extraWallHeight, {
-                    isStatic: true,
-                    render: {
-                        fillStyle: '#95a5a6',
-                        visible: false
-                    }
-                });
-                sideWallExtension.label = 'wall';
-                this.walls.push(sideWallExtension);
-                World.add(this.engine.world, sideWallExtension);
-            }
-        }
+        createLanes2(
+            this.CANVAS_WIDTH, 
+            this.CANVAS_HEIGHT, 
+            this.LANE_COUNT, 
+            this.BLOCK_COUNT, 
+            this.WALL_START_Y, 
+            this.WALL_THICKNESS, 
+            this.BLOCK_HEIGHT_RATIO, 
+            (verticalWallSegments) => this.verticalWallSegments = verticalWallSegments,
+            (walls) => this.walls.push(walls),
+            this.engine.world,
+            this.verticalWallSegments,
+            this.BALL_RADIUS
+        );
     }
+    
     createBlocks() {
         const laneWidth = this.CANVAS_WIDTH / this.LANE_COUNT;
         const blockHeight = (this.CANVAS_HEIGHT - this.WALL_START_Y) / this.BLOCK_COUNT * this.BLOCK_HEIGHT_RATIO;
@@ -1786,8 +1744,85 @@ let drawChevronForBlock2 = (block: block, ctx, dIAGONAL_THICKNESS) => {
 }
 
 let worldRemove = (world, body) => {
-    World.remove(world, body)
+  World.remove(world, body)
 }
+
+%%raw(`
+function createLanes2(
+        CANVAS_WIDTH, 
+        CANVAS_HEIGHT, 
+        LANE_COUNT, 
+        BLOCK_COUNT, 
+        WALL_START_Y, 
+        WALL_THICKNESS, 
+        BLOCK_HEIGHT_RATIO,
+        setVerticalWallSegments,
+        pushWalls, 
+        world,
+        verticalWallSegments,
+        BALL_RADIUS
+    )     {
+        const laneWidth = CANVAS_WIDTH / LANE_COUNT;
+        const blockHeight = (CANVAS_HEIGHT - WALL_START_Y) / BLOCK_COUNT * BLOCK_HEIGHT_RATIO;
+        const localVerticalWallSegments = Array(LANE_COUNT + 1).fill(null).map(() => Array(BLOCK_COUNT).fill(null).map(() => []))
+        setVerticalWallSegments(localVerticalWallSegments)
+
+        for (let laneIndex = 0; laneIndex <= LANE_COUNT; laneIndex++) {
+            const x = laneWidth * laneIndex;
+            // Add walls from top of canvas to WALL_START_Y for the leftmost and rightmost lanes
+            if (laneIndex === 0 || laneIndex === LANE_COUNT) {
+                // Calculate the height of the top wall section
+                const topWallHeight = WALL_START_Y;
+                const topWallY = topWallHeight / 2; // Center point of the wall
+                const topWall = Bodies.rectangle(x, topWallY, WALL_THICKNESS, topWallHeight, {
+                    isStatic: true,
+                    render: {
+                        fillStyle: '#95a5a6'
+                    }
+                });
+                topWall.label = 'wall';
+                pushWalls(topWall);
+                World.add(world, topWall);
+            }
+            for (let blockIndex = 0; blockIndex < BLOCK_COUNT; blockIndex++) {
+                // Skip creating wall segment with medium probability (45%)
+                // But always keep walls on the outer edges
+                if ((laneIndex !== 0 && laneIndex !== LANE_COUNT) && Math.random() < 0.45) {
+                    continue;
+                }
+                const y = WALL_START_Y + (blockHeight * blockIndex) + (blockHeight / 2);
+                const wallSegment = Bodies.rectangle(x, y, WALL_THICKNESS, blockHeight, {
+                    isStatic: true,
+                    render: {
+                        fillStyle: '#95a5a6'
+                    }
+                });
+                wallSegment.label = 'wall';
+                const blockSegments = localVerticalWallSegments[laneIndex]?.[blockIndex];
+                if (blockSegments) {
+                    blockSegments.push(wallSegment);
+                    pushWalls(wallSegment);
+                    World.add(world, wallSegment);
+                }
+            }
+            // Add bottom wall extensions
+            if (laneIndex === 0 || laneIndex === LANE_COUNT) {
+                const extraWallHeight = BALL_RADIUS * 3;
+                const extraWallY = CANVAS_HEIGHT + (extraWallHeight / 3);
+                const sideWallExtension = Bodies.rectangle(x, extraWallY, WALL_THICKNESS, extraWallHeight, {
+                    isStatic: true,
+                    render: {
+                        fillStyle: '#95a5a6',
+                        visible: false
+                    }
+                });
+                sideWallExtension.label = 'wall';
+                pushWalls(sideWallExtension);
+                World.add(world, sideWallExtension);
+            }
+        }
+    }
+`)
 
 // ---------------------------------------------
 

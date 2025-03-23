@@ -169,64 +169,22 @@ class PhysicsGame {
         requestAnimationFrame(this.gameLoop);
     }
     createLanes() {
-        const laneWidth = this.CANVAS_WIDTH / this.LANE_COUNT;
-        const blockHeight = (this.CANVAS_HEIGHT - this.WALL_START_Y) / this.BLOCK_COUNT * this.BLOCK_HEIGHT_RATIO;
-        this.verticalWallSegments = Array(this.LANE_COUNT + 1).fill(null).map(() => Array(this.BLOCK_COUNT).fill(null).map(() => []));
-        for (let laneIndex = 0; laneIndex <= this.LANE_COUNT; laneIndex++) {
-            const x = laneWidth * laneIndex;
-            // Add walls from top of canvas to WALL_START_Y for the leftmost and rightmost lanes
-            if (laneIndex === 0 || laneIndex === this.LANE_COUNT) {
-                // Calculate the height of the top wall section
-                const topWallHeight = this.WALL_START_Y;
-                const topWallY = topWallHeight / 2; // Center point of the wall
-                const topWall = Bodies.rectangle(x, topWallY, this.WALL_THICKNESS, topWallHeight, {
-                    isStatic: true,
-                    render: {
-                        fillStyle: '#95a5a6'
-                    }
-                });
-                topWall.label = 'wall';
-                this.walls.push(topWall);
-                World.add(this.engine.world, topWall);
-            }
-            for (let blockIndex = 0; blockIndex < this.BLOCK_COUNT; blockIndex++) {
-                // Skip creating wall segment with medium probability (45%)
-                // But always keep walls on the outer edges
-                if ((laneIndex !== 0 && laneIndex !== this.LANE_COUNT) && Math.random() < 0.45) {
-                    continue;
-                }
-                const y = this.WALL_START_Y + (blockHeight * blockIndex) + (blockHeight / 2);
-                const wallSegment = Bodies.rectangle(x, y, this.WALL_THICKNESS, blockHeight, {
-                    isStatic: true,
-                    render: {
-                        fillStyle: '#95a5a6'
-                    }
-                });
-                wallSegment.label = 'wall';
-                const blockSegments = this.verticalWallSegments[laneIndex]?.[blockIndex];
-                if (blockSegments) {
-                    blockSegments.push(wallSegment);
-                    this.walls.push(wallSegment);
-                    World.add(this.engine.world, wallSegment);
-                }
-            }
-            // Add bottom wall extensions
-            if (laneIndex === 0 || laneIndex === this.LANE_COUNT) {
-                const extraWallHeight = this.BALL_RADIUS * 3;
-                const extraWallY = this.CANVAS_HEIGHT + (extraWallHeight / 3);
-                const sideWallExtension = Bodies.rectangle(x, extraWallY, this.WALL_THICKNESS, extraWallHeight, {
-                    isStatic: true,
-                    render: {
-                        fillStyle: '#95a5a6',
-                        visible: false
-                    }
-                });
-                sideWallExtension.label = 'wall';
-                this.walls.push(sideWallExtension);
-                World.add(this.engine.world, sideWallExtension);
-            }
-        }
+        createLanes2(
+            this.CANVAS_WIDTH, 
+            this.CANVAS_HEIGHT, 
+            this.LANE_COUNT, 
+            this.BLOCK_COUNT, 
+            this.WALL_START_Y, 
+            this.WALL_THICKNESS, 
+            this.BLOCK_HEIGHT_RATIO, 
+            (verticalWallSegments) => this.verticalWallSegments = verticalWallSegments,
+            (walls) => this.walls.push(walls),
+            this.engine.world,
+            this.verticalWallSegments,
+            this.BALL_RADIUS
+        );
     }
+    
     createBlocks() {
         const laneWidth = this.CANVAS_WIDTH / this.LANE_COUNT;
         const blockHeight = (this.CANVAS_HEIGHT - this.WALL_START_Y) / this.BLOCK_COUNT * this.BLOCK_HEIGHT_RATIO;
@@ -1266,7 +1224,7 @@ function blendColors(color1, color2, factor) {
           RE_EXN_ID: "Assert_failure",
           _1: [
             "Demo_test.res",
-            1280,
+            1238,
             12
           ],
           Error: new Error()
@@ -1280,7 +1238,7 @@ function blendColors(color1, color2, factor) {
           RE_EXN_ID: "Assert_failure",
           _1: [
             "Demo_test.res",
-            1284,
+            1242,
             12
           ],
           Error: new Error()
@@ -1294,7 +1252,7 @@ function blendColors(color1, color2, factor) {
           RE_EXN_ID: "Assert_failure",
           _1: [
             "Demo_test.res",
-            1288,
+            1246,
             12
           ],
           Error: new Error()
@@ -1308,7 +1266,7 @@ function blendColors(color1, color2, factor) {
           RE_EXN_ID: "Assert_failure",
           _1: [
             "Demo_test.res",
-            1292,
+            1250,
             12
           ],
           Error: new Error()
@@ -1322,7 +1280,7 @@ function blendColors(color1, color2, factor) {
           RE_EXN_ID: "Assert_failure",
           _1: [
             "Demo_test.res",
-            1296,
+            1254,
             12
           ],
           Error: new Error()
@@ -1336,7 +1294,7 @@ function blendColors(color1, color2, factor) {
           RE_EXN_ID: "Assert_failure",
           _1: [
             "Demo_test.res",
-            1300,
+            1258,
             12
           ],
           Error: new Error()
@@ -1353,7 +1311,7 @@ if (blendColors("#FF0088", "#FF0088", 0) !== "#ff0088") {
         RE_EXN_ID: "Assert_failure",
         _1: [
           "Demo_test.res",
-          1325,
+          1283,
           0
         ],
         Error: new Error()
@@ -1365,7 +1323,7 @@ if (blendColors("#000000", "#FF0088", 0) !== "#ff0088") {
         RE_EXN_ID: "Assert_failure",
         _1: [
           "Demo_test.res",
-          1326,
+          1284,
           0
         ],
         Error: new Error()
@@ -1377,7 +1335,7 @@ if (blendColors("#000000", "#FF0088", 1) !== "#000000") {
         RE_EXN_ID: "Assert_failure",
         _1: [
           "Demo_test.res",
-          1327,
+          1285,
           0
         ],
         Error: new Error()
@@ -1389,7 +1347,7 @@ if (blendColors("#000000", "#FF0088", 0.5) !== "#7f0044") {
         RE_EXN_ID: "Assert_failure",
         _1: [
           "Demo_test.res",
-          1328,
+          1286,
           0
         ],
         Error: new Error()
@@ -1423,7 +1381,7 @@ function drawRibbon2(ctx, bounds, blockType, value, hitAnimTimer, counter, setHi
                 RE_EXN_ID: "Assert_failure",
                 _1: [
                   "Demo_test.res",
-                  1380,
+                  1338,
                   8
                 ],
                 Error: new Error()
@@ -1515,7 +1473,7 @@ function randomWeighted(blockTypeWeights) {
           RE_EXN_ID: "Assert_failure",
           _1: [
             "Demo_test.res",
-            1457,
+            1415,
             52
           ],
           Error: new Error()
@@ -1615,7 +1573,7 @@ function getRandomBlockType2(currentLevel) {
         RE_EXN_ID: "Assert_failure",
         _1: [
           "Demo_test.res",
-          1488,
+          1446,
           12
         ],
         Error: new Error()
@@ -1810,6 +1768,82 @@ function drawChevronForBlock2(block, ctx, dIAGONAL_THICKNESS) {
 function worldRemove(world, body) {
   return Matter.World.remove(world, body);
 }
+
+function createLanes2(
+        CANVAS_WIDTH, 
+        CANVAS_HEIGHT, 
+        LANE_COUNT, 
+        BLOCK_COUNT, 
+        WALL_START_Y, 
+        WALL_THICKNESS, 
+        BLOCK_HEIGHT_RATIO,
+        setVerticalWallSegments,
+        pushWalls, 
+        world,
+        verticalWallSegments,
+        BALL_RADIUS
+    )     {
+        const laneWidth = CANVAS_WIDTH / LANE_COUNT;
+        const blockHeight = (CANVAS_HEIGHT - WALL_START_Y) / BLOCK_COUNT * BLOCK_HEIGHT_RATIO;
+        const localVerticalWallSegments = Array(LANE_COUNT + 1).fill(null).map(() => Array(BLOCK_COUNT).fill(null).map(() => []))
+        setVerticalWallSegments(localVerticalWallSegments)
+
+        for (let laneIndex = 0; laneIndex <= LANE_COUNT; laneIndex++) {
+            const x = laneWidth * laneIndex;
+            // Add walls from top of canvas to WALL_START_Y for the leftmost and rightmost lanes
+            if (laneIndex === 0 || laneIndex === LANE_COUNT) {
+                // Calculate the height of the top wall section
+                const topWallHeight = WALL_START_Y;
+                const topWallY = topWallHeight / 2; // Center point of the wall
+                const topWall = Bodies.rectangle(x, topWallY, WALL_THICKNESS, topWallHeight, {
+                    isStatic: true,
+                    render: {
+                        fillStyle: '#95a5a6'
+                    }
+                });
+                topWall.label = 'wall';
+                pushWalls(topWall);
+                World.add(world, topWall);
+            }
+            for (let blockIndex = 0; blockIndex < BLOCK_COUNT; blockIndex++) {
+                // Skip creating wall segment with medium probability (45%)
+                // But always keep walls on the outer edges
+                if ((laneIndex !== 0 && laneIndex !== LANE_COUNT) && Math.random() < 0.45) {
+                    continue;
+                }
+                const y = WALL_START_Y + (blockHeight * blockIndex) + (blockHeight / 2);
+                const wallSegment = Bodies.rectangle(x, y, WALL_THICKNESS, blockHeight, {
+                    isStatic: true,
+                    render: {
+                        fillStyle: '#95a5a6'
+                    }
+                });
+                wallSegment.label = 'wall';
+                const blockSegments = localVerticalWallSegments[laneIndex]?.[blockIndex];
+                if (blockSegments) {
+                    blockSegments.push(wallSegment);
+                    pushWalls(wallSegment);
+                    World.add(world, wallSegment);
+                }
+            }
+            // Add bottom wall extensions
+            if (laneIndex === 0 || laneIndex === LANE_COUNT) {
+                const extraWallHeight = BALL_RADIUS * 3;
+                const extraWallY = CANVAS_HEIGHT + (extraWallHeight / 3);
+                const sideWallExtension = Bodies.rectangle(x, extraWallY, WALL_THICKNESS, extraWallHeight, {
+                    isStatic: true,
+                    render: {
+                        fillStyle: '#95a5a6',
+                        visible: false
+                    }
+                });
+                sideWallExtension.label = 'wall';
+                pushWalls(sideWallExtension);
+                World.add(world, sideWallExtension);
+            }
+        }
+    }
+;
 
 if (typeof window === "object") {
   window.onload = (function () {
