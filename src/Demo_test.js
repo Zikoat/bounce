@@ -4,6 +4,9 @@ import * as Core__Int from "@rescript/core/src/Core__Int.js";
 import * as Belt_Array from "rescript/lib/es6/belt_Array.js";
 import * as Core__Array from "@rescript/core/src/Core__Array.js";
 
+import.meta.hot.accept()
+;
+
 console.log("Hello, world!");
 
 import * as Matter from 'matter-js';
@@ -540,24 +543,7 @@ class PhysicsGame {
         }
     }
     removeWallSegment(laneIndex, blockIndex) {
-        if (laneIndex < 0 || laneIndex >= this.verticalWallSegments.length) {
-            return;
-        }
-        const laneSegments = this.verticalWallSegments[laneIndex];
-        if (!laneSegments || blockIndex < 0 || blockIndex >= laneSegments.length) {
-            return;
-        }
-        const blockSegments = laneSegments[blockIndex];
-        if (!blockSegments || blockSegments.length === 0) {
-            return;
-        }
-        for (const wallSegment of [...blockSegments]) {
-            this.walls = this.walls.filter(wall => wall !== wallSegment);
-            worldRemove(this.engine.world, wallSegment);
-        }
-        if (this.verticalWallSegments[laneIndex] && this.verticalWallSegments[laneIndex][blockIndex]) {
-            this.verticalWallSegments[laneIndex][blockIndex] = [];
-        }
+        removeWallSegment2(laneIndex, blockIndex, ()=>this.verticalWallSegments, this.engine.world, this.walls, (val)=>this.walls = val, );
     }
     handleCollisions = (event) => {
         event.pairs.forEach((pair) => {
@@ -1223,7 +1209,7 @@ function blendColors(color1, color2, factor) {
           RE_EXN_ID: "Assert_failure",
           _1: [
             "Demo_test.res",
-            1237,
+            1220,
             12
           ],
           Error: new Error()
@@ -1237,7 +1223,7 @@ function blendColors(color1, color2, factor) {
           RE_EXN_ID: "Assert_failure",
           _1: [
             "Demo_test.res",
-            1241,
+            1224,
             12
           ],
           Error: new Error()
@@ -1251,7 +1237,7 @@ function blendColors(color1, color2, factor) {
           RE_EXN_ID: "Assert_failure",
           _1: [
             "Demo_test.res",
-            1245,
+            1228,
             12
           ],
           Error: new Error()
@@ -1265,7 +1251,7 @@ function blendColors(color1, color2, factor) {
           RE_EXN_ID: "Assert_failure",
           _1: [
             "Demo_test.res",
-            1249,
+            1232,
             12
           ],
           Error: new Error()
@@ -1279,7 +1265,7 @@ function blendColors(color1, color2, factor) {
           RE_EXN_ID: "Assert_failure",
           _1: [
             "Demo_test.res",
-            1253,
+            1236,
             12
           ],
           Error: new Error()
@@ -1293,7 +1279,7 @@ function blendColors(color1, color2, factor) {
           RE_EXN_ID: "Assert_failure",
           _1: [
             "Demo_test.res",
-            1257,
+            1240,
             12
           ],
           Error: new Error()
@@ -1310,7 +1296,7 @@ if (blendColors("#FF0088", "#FF0088", 0) !== "#ff0088") {
         RE_EXN_ID: "Assert_failure",
         _1: [
           "Demo_test.res",
-          1282,
+          1265,
           0
         ],
         Error: new Error()
@@ -1322,7 +1308,7 @@ if (blendColors("#000000", "#FF0088", 0) !== "#ff0088") {
         RE_EXN_ID: "Assert_failure",
         _1: [
           "Demo_test.res",
-          1283,
+          1266,
           0
         ],
         Error: new Error()
@@ -1334,7 +1320,7 @@ if (blendColors("#000000", "#FF0088", 1) !== "#000000") {
         RE_EXN_ID: "Assert_failure",
         _1: [
           "Demo_test.res",
-          1284,
+          1267,
           0
         ],
         Error: new Error()
@@ -1346,7 +1332,7 @@ if (blendColors("#000000", "#FF0088", 0.5) !== "#7f0044") {
         RE_EXN_ID: "Assert_failure",
         _1: [
           "Demo_test.res",
-          1285,
+          1268,
           0
         ],
         Error: new Error()
@@ -1380,7 +1366,7 @@ function drawRibbon2(ctx, bounds, blockType, value, hitAnimTimer, counter, setHi
                 RE_EXN_ID: "Assert_failure",
                 _1: [
                   "Demo_test.res",
-                  1337,
+                  1320,
                   8
                 ],
                 Error: new Error()
@@ -1472,7 +1458,7 @@ function randomWeighted(blockTypeWeights) {
           RE_EXN_ID: "Assert_failure",
           _1: [
             "Demo_test.res",
-            1414,
+            1397,
             52
           ],
           Error: new Error()
@@ -1572,7 +1558,7 @@ function getRandomBlockType2(currentLevel) {
         RE_EXN_ID: "Assert_failure",
         _1: [
           "Demo_test.res",
-          1445,
+          1428,
           12
         ],
         Error: new Error()
@@ -1813,6 +1799,28 @@ function createLanes2(canvasWidth, canvasHeight, laneCount, blockCount, wallStar
     }
   }
 }
+
+function removeWallSegment2(laneIndex, blockIndex, getVerticalWallSegments, world, walls, setWalls) {
+        if (laneIndex < 0 || laneIndex >= getVerticalWallSegments().length) {
+            return;
+        }
+        const laneSegments = getVerticalWallSegments()[laneIndex];
+        if (!laneSegments || blockIndex < 0 || blockIndex >= laneSegments.length) {
+            return;
+        }
+        const blockSegments = laneSegments[blockIndex];
+        if (!blockSegments || blockSegments.length === 0) {
+            return;
+        }
+        for (const wallSegment of [...blockSegments]) {
+            setWalls(walls.filter(wall => wall !== wallSegment));
+            worldRemove(world, wallSegment);
+        }
+        if (getVerticalWallSegments()[laneIndex] && getVerticalWallSegments()[laneIndex][blockIndex]) {
+            getVerticalWallSegments()[laneIndex][blockIndex] = [];
+        }
+    }
+;
 
 if (typeof window === "object") {
   window.onload = (function () {

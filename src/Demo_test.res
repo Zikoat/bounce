@@ -1,7 +1,7 @@
 // open Webapi.Canvas
 open Webapi.Canvas.Canvas2d
 // open Webapi.Dom
-
+%%raw(`import.meta.hot.accept()`)
 Console.log("Hello, world!")
 
 // todo: rename file
@@ -549,24 +549,7 @@ class PhysicsGame {
         }
     }
     removeWallSegment(laneIndex, blockIndex) {
-        if (laneIndex < 0 || laneIndex >= this.verticalWallSegments.length) {
-            return;
-        }
-        const laneSegments = this.verticalWallSegments[laneIndex];
-        if (!laneSegments || blockIndex < 0 || blockIndex >= laneSegments.length) {
-            return;
-        }
-        const blockSegments = laneSegments[blockIndex];
-        if (!blockSegments || blockSegments.length === 0) {
-            return;
-        }
-        for (const wallSegment of [...blockSegments]) {
-            this.walls = this.walls.filter(wall => wall !== wallSegment);
-            worldRemove(this.engine.world, wallSegment);
-        }
-        if (this.verticalWallSegments[laneIndex] && this.verticalWallSegments[laneIndex][blockIndex]) {
-            this.verticalWallSegments[laneIndex][blockIndex] = [];
-        }
+        removeWallSegment2(laneIndex, blockIndex, ()=>this.verticalWallSegments, this.engine.world, this.walls, (val)=>this.walls = val, );
     }
     handleCollisions = (event) => {
         event.pairs.forEach((pair) => {
@@ -1832,6 +1815,29 @@ let createLanes2 = (
     }
   }
 }
+
+%%raw(`
+    function removeWallSegment2(laneIndex, blockIndex, getVerticalWallSegments, world, walls, setWalls) {
+        if (laneIndex < 0 || laneIndex >= getVerticalWallSegments().length) {
+            return;
+        }
+        const laneSegments = getVerticalWallSegments()[laneIndex];
+        if (!laneSegments || blockIndex < 0 || blockIndex >= laneSegments.length) {
+            return;
+        }
+        const blockSegments = laneSegments[blockIndex];
+        if (!blockSegments || blockSegments.length === 0) {
+            return;
+        }
+        for (const wallSegment of [...blockSegments]) {
+            setWalls(walls.filter(wall => wall !== wallSegment));
+            worldRemove(world, wallSegment);
+        }
+        if (getVerticalWallSegments()[laneIndex] && getVerticalWallSegments()[laneIndex][blockIndex]) {
+            getVerticalWallSegments()[laneIndex][blockIndex] = [];
+        }
+    }
+`)
 
 // ---------------------------------------------
 
