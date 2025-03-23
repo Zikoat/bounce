@@ -189,7 +189,7 @@ class PhysicsGame {
             (verticalWallSegments) => this.verticalWallSegments = verticalWallSegments,
             (walls) => this.walls.push(walls),
             this.engine.world,
-            this.verticalWallSegments,
+            ()=>this.verticalWallSegments,
             this.BALL_RADIUS
         );
     }
@@ -1759,13 +1759,12 @@ function createLanes2(
         setVerticalWallSegments,
         pushWalls, 
         world,
-        verticalWallSegments,
+        getVerticalWallSegments,
         BALL_RADIUS
     )     {
         const laneWidth = CANVAS_WIDTH / LANE_COUNT;
         const blockHeight = (CANVAS_HEIGHT - WALL_START_Y) / BLOCK_COUNT * BLOCK_HEIGHT_RATIO;
-        const localVerticalWallSegments = Array(LANE_COUNT + 1).fill(null).map(() => Array(BLOCK_COUNT).fill(null).map(() => []))
-        setVerticalWallSegments(localVerticalWallSegments)
+        setVerticalWallSegments( Array(LANE_COUNT + 1).fill(null).map(() => Array(BLOCK_COUNT).fill(null).map(() => [])))
 
         for (let laneIndex = 0; laneIndex <= LANE_COUNT; laneIndex++) {
             const x = laneWidth * laneIndex;
@@ -1798,7 +1797,7 @@ function createLanes2(
                     }
                 });
                 wallSegment.label = 'wall';
-                const blockSegments = localVerticalWallSegments[laneIndex]?.[blockIndex];
+                const blockSegments = getVerticalWallSegments()[laneIndex]?.[blockIndex];
                 if (blockSegments) {
                     blockSegments.push(wallSegment);
                     pushWalls(wallSegment);
