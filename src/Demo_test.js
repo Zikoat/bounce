@@ -997,34 +997,7 @@ class PhysicsGame {
         });
     }
     lineSegmentIntersectsRibbon(x1, y1, x2, y2, block) {
-        if (block.type !== "Multiply" && block.type !== "Remove")
-            return false;
-        const ribbonHeight = (block.bounds.max.y - block.bounds.min.y) / 3;
-        const ribbonY = (block.bounds.max.y + block.bounds.min.y) / 2 - ribbonHeight / 2;
-        const ribbonTop = ribbonY;
-        const ribbonBottom = ribbonY + ribbonHeight;
-        const ribbonLeft = block.bounds.min.x;
-        const ribbonRight = block.bounds.max.x;
-        if (Math.abs(x2 - x1) < 0.0001) {
-            const minY = Math.min(y1, y2);
-            const maxY = Math.max(y1, y2);
-            return x1 >= ribbonLeft && x1 <= ribbonRight && minY <= ribbonBottom && maxY >= ribbonTop;
-        }
-        const xAtTop = x1 + (x2 - x1) * (ribbonTop - y1) / (y2 - y1);
-        const xAtBottom = x1 + (x2 - x1) * (ribbonBottom - y1) / (y2 - y1);
-        if ((xAtTop >= ribbonLeft && xAtTop <= ribbonRight && ribbonTop >= Math.min(y1, y2) && ribbonTop <= Math.max(y1, y2)) ||
-            (xAtBottom >= ribbonLeft && xAtBottom <= ribbonRight && ribbonBottom >= Math.min(y1, y2) && ribbonBottom <= Math.max(y1, y2))) {
-            return true;
-        }
-        if (Math.abs(y2 - y1) < 0.0001) {
-            const minX = Math.min(x1, x2);
-            const maxX = Math.max(x1, x2);
-            return y1 >= ribbonTop && y1 <= ribbonBottom && minX <= ribbonRight && maxX >= ribbonLeft;
-        }
-        const yAtLeft = y1 + (y2 - y1) * (ribbonLeft - x1) / (x2 - x1);
-        const yAtRight = y1 + (y2 - y1) * (ribbonRight - x1) / (x2 - x1);
-        return (yAtLeft >= ribbonTop && yAtLeft <= ribbonBottom && ribbonLeft >= Math.min(x1, x2) && ribbonLeft <= Math.max(x1, x2)) ||
-            (yAtRight >= ribbonTop && yAtRight <= ribbonBottom && ribbonRight >= Math.min(x1, x2) && ribbonRight <= Math.max(x1, x2));
+        lineSegmentIntersectsRibbon2(x1, y1, x2, y2, block)
     }
     handleMultiplication(ball, block) {
         // Create (value - 1) new balls for the multiply block
@@ -1317,7 +1290,7 @@ function blendColors(color1, color2, factor) {
           RE_EXN_ID: "Assert_failure",
           _1: [
             "Demo_test.res",
-            1331,
+            1304,
             12
           ],
           Error: new Error()
@@ -1331,7 +1304,7 @@ function blendColors(color1, color2, factor) {
           RE_EXN_ID: "Assert_failure",
           _1: [
             "Demo_test.res",
-            1335,
+            1308,
             12
           ],
           Error: new Error()
@@ -1345,7 +1318,7 @@ function blendColors(color1, color2, factor) {
           RE_EXN_ID: "Assert_failure",
           _1: [
             "Demo_test.res",
-            1339,
+            1312,
             12
           ],
           Error: new Error()
@@ -1359,7 +1332,7 @@ function blendColors(color1, color2, factor) {
           RE_EXN_ID: "Assert_failure",
           _1: [
             "Demo_test.res",
-            1343,
+            1316,
             12
           ],
           Error: new Error()
@@ -1373,7 +1346,7 @@ function blendColors(color1, color2, factor) {
           RE_EXN_ID: "Assert_failure",
           _1: [
             "Demo_test.res",
-            1347,
+            1320,
             12
           ],
           Error: new Error()
@@ -1387,7 +1360,7 @@ function blendColors(color1, color2, factor) {
           RE_EXN_ID: "Assert_failure",
           _1: [
             "Demo_test.res",
-            1351,
+            1324,
             12
           ],
           Error: new Error()
@@ -1404,7 +1377,7 @@ if (blendColors("#FF0088", "#FF0088", 0) !== "#ff0088") {
         RE_EXN_ID: "Assert_failure",
         _1: [
           "Demo_test.res",
-          1376,
+          1349,
           0
         ],
         Error: new Error()
@@ -1416,7 +1389,7 @@ if (blendColors("#000000", "#FF0088", 0) !== "#ff0088") {
         RE_EXN_ID: "Assert_failure",
         _1: [
           "Demo_test.res",
-          1377,
+          1350,
           0
         ],
         Error: new Error()
@@ -1428,7 +1401,7 @@ if (blendColors("#000000", "#FF0088", 1) !== "#000000") {
         RE_EXN_ID: "Assert_failure",
         _1: [
           "Demo_test.res",
-          1378,
+          1351,
           0
         ],
         Error: new Error()
@@ -1440,7 +1413,7 @@ if (blendColors("#000000", "#FF0088", 0.5) !== "#7f0044") {
         RE_EXN_ID: "Assert_failure",
         _1: [
           "Demo_test.res",
-          1379,
+          1352,
           0
         ],
         Error: new Error()
@@ -1474,7 +1447,7 @@ function drawRibbon2(ctx, bounds, blockType, value, hitAnimTimer, counter, setHi
                 RE_EXN_ID: "Assert_failure",
                 _1: [
                   "Demo_test.res",
-                  1431,
+                  1404,
                   8
                 ],
                 Error: new Error()
@@ -1565,7 +1538,7 @@ function randomWeighted(blockTypeWeights) {
           RE_EXN_ID: "Assert_failure",
           _1: [
             "Demo_test.res",
-            1508,
+            1481,
             52
           ],
           Error: new Error()
@@ -1665,7 +1638,7 @@ function getRandomBlockType2(currentLevel) {
         RE_EXN_ID: "Assert_failure",
         _1: [
           "Demo_test.res",
-          1539,
+          1512,
           12
         ],
         Error: new Error()
@@ -1712,7 +1685,7 @@ function drawMultiplyEffect2(x, y, value, context, ballRadius) {
   context.restore();
 }
 
-function drawUI2(ctx, currentLevel, canvasWidth, ballsRemaining, score, balls, timeSinceLastCollection, nO_COLLECTION_TIMEOUT, levelCompleteTimer, canvasHeight, levelCompleteMessage, setLevelCompleteTimer, gameOver, finalScore, initialBallCount, spawnActive, spawnPosition, bALL_RADIUS) {
+function drawUI2(ctx, currentLevel, canvasWidth, ballsRemaining, score, balls, timeSinceLastCollection, noCollectionTimeout, levelCompleteTimer, canvasHeight, levelCompleteMessage, setLevelCompleteTimer, gameOver, finalScore, initialBallCount, spawnActive, spawnPosition, ballRadius) {
   ctx.save();
   ctx.fillStyle = "#2c3e50";
   ctx.font = "bold 24px Arial";
@@ -1726,7 +1699,7 @@ function drawUI2(ctx, currentLevel, canvasWidth, ballsRemaining, score, balls, t
   ctx.textAlign = "right";
   ctx.fillText("In play: " + String(balls.length), canvasWidth - 20, 50, undefined);
   if (ballsRemaining === 0 && balls.length > 0 && timeSinceLastCollection > 0) {
-    var timeLeft = Math.ceil((nO_COLLECTION_TIMEOUT - timeSinceLastCollection) / 60);
+    var timeLeft = Math.ceil((noCollectionTimeout - timeSinceLastCollection) / 60);
     if (timeLeft <= 4) {
       ctx.textAlign = "center";
       var ballsRemainingTextColor = timeLeft <= 2 ? "#e74c3c" : "#f39c12";
@@ -1770,16 +1743,63 @@ function drawUI2(ctx, currentLevel, canvasWidth, ballsRemaining, score, balls, t
       ctx.font = "bold 18px Arial";
       ctx.textAlign = "center";
       ctx.textBaseline = "bottom";
-      ctx.fillText("Click to Start", spawnPosition.x, (spawnPosition.y - bALL_RADIUS | 0) - 5 | 0, undefined);
+      ctx.fillText("Click to Start", spawnPosition.x, (spawnPosition.y - ballRadius | 0) - 5 | 0, undefined);
     }
     
   }
   if (levelCompleteTimer <= 0) {
     ctx.beginPath();
-    ctx.arc(spawnPosition.x, spawnPosition.y, bALL_RADIUS, 0, Math.PI * 2, undefined);
+    ctx.arc(spawnPosition.x, spawnPosition.y, ballRadius, 0, Math.PI * 2, undefined);
     ctx.fill();
   }
   ctx.restore();
+}
+
+function lineSegmentIntersectsRibbon2(x1, y1, x2, y2, block) {
+  var match = block.type2;
+  switch (match) {
+    case "Multiply" :
+    case "Remove" :
+        return false;
+    default:
+      var ribbonHeight = (block.bounds.max.y - block.bounds.min.y | 0) / 3;
+      var ribbonY = (block.bounds.max.y + block.bounds.min.y | 0) / 2 - ribbonHeight / 2;
+      var ribbonBottom = ribbonY + ribbonHeight;
+      var ribbonLeft = block.bounds.min.x;
+      var ribbonRight = block.bounds.max.x;
+      if (Math.abs(x2 - x1) < 0.0001) {
+        var minY = Math.min(y1, y2);
+        var maxY = Math.max(y1, y2);
+        if (x1 >= ribbonLeft && x1 <= ribbonRight && minY <= ribbonBottom) {
+          return maxY >= ribbonY;
+        } else {
+          return false;
+        }
+      }
+      var xAtTop = x1 + (x2 - x1) * (ribbonY - y1) / (y2 - y1);
+      var xAtBottom = x1 + (x2 - x1) * (ribbonBottom - y1) / (y2 - y1);
+      if (xAtTop >= ribbonLeft && xAtTop <= ribbonRight && ribbonY >= Math.min(y1, y2) && ribbonY <= Math.max(y1, y2) || xAtBottom >= ribbonLeft && xAtBottom <= ribbonRight && ribbonBottom >= Math.min(y1, y2) && ribbonBottom <= Math.max(y1, y2)) {
+        return true;
+      }
+      if (Math.abs(y2 - y1) < 0.0001) {
+        var minX = Math.min(x1, x2);
+        var maxX = Math.max(x1, x2);
+        if (y1 >= ribbonY && y1 <= ribbonBottom && minX <= ribbonRight) {
+          return maxX >= ribbonLeft;
+        } else {
+          return false;
+        }
+      }
+      var yAtLeft = y1 + (y2 - y1) * (ribbonLeft - x1) / (x2 - x1);
+      var yAtRight = y1 + (y2 - y1) * (ribbonRight - x1) / (x2 - x1);
+      if (yAtLeft >= ribbonY && yAtLeft <= ribbonBottom && ribbonLeft >= Math.min(x1, x2) && ribbonLeft <= Math.max(x1, x2)) {
+        return true;
+      } else if (yAtRight >= ribbonY && yAtRight <= ribbonBottom && ribbonRight >= Math.min(x1, x2)) {
+        return ribbonRight <= Math.max(x1, x2);
+      } else {
+        return false;
+      }
+  }
 }
 
 if (typeof window === "object") {
@@ -1801,5 +1821,6 @@ export {
   drawPlusEffect2 ,
   drawMultiplyEffect2 ,
   drawUI2 ,
+  lineSegmentIntersectsRibbon2 ,
 }
 /*  Not a pure module */

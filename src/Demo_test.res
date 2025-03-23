@@ -1006,34 +1006,7 @@ class PhysicsGame {
         });
     }
     lineSegmentIntersectsRibbon(x1, y1, x2, y2, block) {
-        if (block.type !== "Multiply" && block.type !== "Remove")
-            return false;
-        const ribbonHeight = (block.bounds.max.y - block.bounds.min.y) / 3;
-        const ribbonY = (block.bounds.max.y + block.bounds.min.y) / 2 - ribbonHeight / 2;
-        const ribbonTop = ribbonY;
-        const ribbonBottom = ribbonY + ribbonHeight;
-        const ribbonLeft = block.bounds.min.x;
-        const ribbonRight = block.bounds.max.x;
-        if (Math.abs(x2 - x1) < 0.0001) {
-            const minY = Math.min(y1, y2);
-            const maxY = Math.max(y1, y2);
-            return x1 >= ribbonLeft && x1 <= ribbonRight && minY <= ribbonBottom && maxY >= ribbonTop;
-        }
-        const xAtTop = x1 + (x2 - x1) * (ribbonTop - y1) / (y2 - y1);
-        const xAtBottom = x1 + (x2 - x1) * (ribbonBottom - y1) / (y2 - y1);
-        if ((xAtTop >= ribbonLeft && xAtTop <= ribbonRight && ribbonTop >= Math.min(y1, y2) && ribbonTop <= Math.max(y1, y2)) ||
-            (xAtBottom >= ribbonLeft && xAtBottom <= ribbonRight && ribbonBottom >= Math.min(y1, y2) && ribbonBottom <= Math.max(y1, y2))) {
-            return true;
-        }
-        if (Math.abs(y2 - y1) < 0.0001) {
-            const minX = Math.min(x1, x2);
-            const maxX = Math.max(x1, x2);
-            return y1 >= ribbonTop && y1 <= ribbonBottom && minX <= ribbonRight && maxX >= ribbonLeft;
-        }
-        const yAtLeft = y1 + (y2 - y1) * (ribbonLeft - x1) / (x2 - x1);
-        const yAtRight = y1 + (y2 - y1) * (ribbonRight - x1) / (x2 - x1);
-        return (yAtLeft >= ribbonTop && yAtLeft <= ribbonBottom && ribbonLeft >= Math.min(x1, x2) && ribbonLeft <= Math.max(x1, x2)) ||
-            (yAtRight >= ribbonTop && yAtRight <= ribbonBottom && ribbonRight >= Math.min(x1, x2) && ribbonRight <= Math.max(x1, x2));
+        lineSegmentIntersectsRibbon2(x1, y1, x2, y2, block)
     }
     handleMultiplication(ball, block) {
         // Create (value - 1) new balls for the multiply block
@@ -1584,14 +1557,14 @@ let drawMultiplyEffect2 = (x, y, value, context, ballRadius) => {
 }
 
 let drawUI2 = (
-  ctx: myContext,
+  ctx,
   currentLevel,
   canvasWidth,
   ballsRemaining,
   score,
   balls,
   timeSinceLastCollection,
-  nO_COLLECTION_TIMEOUT,
+  noCollectionTimeout,
   levelCompleteTimer,
   canvasHeight,
   levelCompleteMessage,
@@ -1601,7 +1574,7 @@ let drawUI2 = (
   initialBallCount,
   spawnActive,
   spawnPosition,
-  bALL_RADIUS,
+  ballRadius,
 ) => {
   ctx->save
   ctx->setFillStyle(String, "#2c3e50")
@@ -1625,7 +1598,7 @@ let drawUI2 = (
   // Only show the countdown when there are 4 or fewer seconds remaining
   if ballsRemaining == 0 && balls->Array.length > 0 && timeSinceLastCollection > 0 {
     let timeLeft = Math.ceil(
-      ((nO_COLLECTION_TIMEOUT :> float) -. (timeSinceLastCollection :> float)) /. 60.,
+      ((noCollectionTimeout :> float) -. (timeSinceLastCollection :> float)) /. 60.,
     )
     if timeLeft <= 4. {
       ctx->textAlign("center")
@@ -1723,7 +1696,7 @@ let drawUI2 = (
       ctx->fillText(
         "Click to Start",
         ~x=(spawnPosition.x :> float),
-        ~y=(spawnPosition.y - bALL_RADIUS - 5 :> float),
+        ~y=(spawnPosition.y - ballRadius - 5 :> float),
         (),
       )
     }
@@ -1733,7 +1706,7 @@ let drawUI2 = (
     ctx->arc(
       ~x=(spawnPosition.x :> float),
       ~y=(spawnPosition.y :> float),
-      ~r=(bALL_RADIUS :> float),
+      ~r=(ballRadius :> float),
       ~startAngle=0.,
       ~endAngle=Math.Constants.pi *. 2.,
       (),
@@ -1741,6 +1714,68 @@ let drawUI2 = (
     ctx->fill
   }
   ctx->restore
+}
+
+type block = {
+  type2: blockType,
+  bounds: bounds,
+}
+
+let lineSegmentIntersectsRibbon2 = (x1, y1, x2, y2, block: block): bool => {
+  switch block.type2 {
+  | Multiply | Remove => false
+  | Diagonal | Chevron | Empty | Plus => {
+      let ribbonHeight = (block.bounds.max.y - block.bounds.min.y :> float) /. 3.
+      let ribbonY = (block.bounds.max.y + block.bounds.min.y :> float) /. 2. -. ribbonHeight /. 2.
+      let ribbonTop = ribbonY
+      let ribbonBottom = ribbonY +. ribbonHeight
+      let ribbonLeft = (block.bounds.min.x :> float)
+      let ribbonRight = (block.bounds.max.x :> float)
+
+      switch Math.abs(x2 -. x1) < 0.0001 {
+      | true => {
+          let minY = Math.min(y1, y2)
+          let maxY = Math.max(y1, y2)
+          x1 >= ribbonLeft && x1 <= ribbonRight && minY <= ribbonBottom && maxY >= ribbonTop
+        }
+      | false => {
+          let xAtTop = x1 +. (x2 -. x1) *. (ribbonTop -. y1) /. (y2 -. y1)
+          let xAtBottom = x1 +. (x2 -. x1) *. (ribbonBottom -. y1) /. (y2 -. y1)
+
+          switch (xAtTop >= ribbonLeft &&
+          xAtTop <= ribbonRight &&
+          ribbonTop >= Math.min(y1, y2) &&
+          ribbonTop <= Math.max(y1, y2)) ||
+            (xAtBottom >= ribbonLeft &&
+            xAtBottom <= ribbonRight &&
+            ribbonBottom >= Math.min(y1, y2) &&
+            ribbonBottom <= Math.max(y1, y2)) {
+          | true => true
+          | false =>
+            switch Math.abs(y2 -. y1) < 0.0001 {
+            | true => {
+                let minX = Math.min(x1, x2)
+                let maxX = Math.max(x1, x2)
+                y1 >= ribbonTop && y1 <= ribbonBottom && minX <= ribbonRight && maxX >= ribbonLeft
+              }
+            | false => {
+                let yAtLeft = y1 +. (y2 -. y1) *. (ribbonLeft -. x1) /. (x2 -. x1)
+                let yAtRight = y1 +. (y2 -. y1) *. (ribbonRight -. x1) /. (x2 -. x1)
+                (yAtLeft >= ribbonTop &&
+                yAtLeft <= ribbonBottom &&
+                ribbonLeft >= Math.min(x1, x2) &&
+                ribbonLeft <= Math.max(x1, x2)) ||
+                  (yAtRight >= ribbonTop &&
+                  yAtRight <= ribbonBottom &&
+                  ribbonRight >= Math.min(x1, x2) &&
+                  ribbonRight <= Math.max(x1, x2))
+              }
+            }
+          }
+        }
+      }
+    }
+  }
 }
 
 // ---------------------------------------------
