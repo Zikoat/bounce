@@ -190,7 +190,6 @@ class PhysicsGame {
             (walls) => this.walls.push(walls),
             this.engine.world,
             ()=>this.verticalWallSegments,
-            this.BALL_RADIUS
         );
     }
     
@@ -1758,8 +1757,7 @@ let createLanes2 = (
   setVerticalWallSegments,
   pushWalls,
   world,
-  _getVerticalWallSegments: unit => array<array<array<Bodies.body>>>,
-  _bALL_RADIUS,
+  getVerticalWallSegments: unit => array<array<array<Bodies.body>>>,
 ) => {
   let laneWidth: float = canvasWidth /. (laneCount :> float)
   let blockHeight: float = (canvasHeight -. wallStartY) /. (blockCount :> float) *. blockHeightRatio
@@ -1814,7 +1812,7 @@ let createLanes2 = (
           )
           wallSegment.label = "wall"
 
-          let row = _getVerticalWallSegments()[laneIndex]
+          let row = getVerticalWallSegments()[laneIndex]
           switch row {
           | Some(row) => {
               let blockSegments = row[blockIndex]

@@ -181,7 +181,6 @@ class PhysicsGame {
             (walls) => this.walls.push(walls),
             this.engine.world,
             ()=>this.verticalWallSegments,
-            this.BALL_RADIUS
         );
     }
     
@@ -1224,7 +1223,7 @@ function blendColors(color1, color2, factor) {
           RE_EXN_ID: "Assert_failure",
           _1: [
             "Demo_test.res",
-            1238,
+            1237,
             12
           ],
           Error: new Error()
@@ -1238,7 +1237,7 @@ function blendColors(color1, color2, factor) {
           RE_EXN_ID: "Assert_failure",
           _1: [
             "Demo_test.res",
-            1242,
+            1241,
             12
           ],
           Error: new Error()
@@ -1252,7 +1251,7 @@ function blendColors(color1, color2, factor) {
           RE_EXN_ID: "Assert_failure",
           _1: [
             "Demo_test.res",
-            1246,
+            1245,
             12
           ],
           Error: new Error()
@@ -1266,7 +1265,7 @@ function blendColors(color1, color2, factor) {
           RE_EXN_ID: "Assert_failure",
           _1: [
             "Demo_test.res",
-            1250,
+            1249,
             12
           ],
           Error: new Error()
@@ -1280,7 +1279,7 @@ function blendColors(color1, color2, factor) {
           RE_EXN_ID: "Assert_failure",
           _1: [
             "Demo_test.res",
-            1254,
+            1253,
             12
           ],
           Error: new Error()
@@ -1294,7 +1293,7 @@ function blendColors(color1, color2, factor) {
           RE_EXN_ID: "Assert_failure",
           _1: [
             "Demo_test.res",
-            1258,
+            1257,
             12
           ],
           Error: new Error()
@@ -1311,7 +1310,7 @@ if (blendColors("#FF0088", "#FF0088", 0) !== "#ff0088") {
         RE_EXN_ID: "Assert_failure",
         _1: [
           "Demo_test.res",
-          1283,
+          1282,
           0
         ],
         Error: new Error()
@@ -1323,7 +1322,7 @@ if (blendColors("#000000", "#FF0088", 0) !== "#ff0088") {
         RE_EXN_ID: "Assert_failure",
         _1: [
           "Demo_test.res",
-          1284,
+          1283,
           0
         ],
         Error: new Error()
@@ -1335,7 +1334,7 @@ if (blendColors("#000000", "#FF0088", 1) !== "#000000") {
         RE_EXN_ID: "Assert_failure",
         _1: [
           "Demo_test.res",
-          1285,
+          1284,
           0
         ],
         Error: new Error()
@@ -1347,7 +1346,7 @@ if (blendColors("#000000", "#FF0088", 0.5) !== "#7f0044") {
         RE_EXN_ID: "Assert_failure",
         _1: [
           "Demo_test.res",
-          1286,
+          1285,
           0
         ],
         Error: new Error()
@@ -1381,7 +1380,7 @@ function drawRibbon2(ctx, bounds, blockType, value, hitAnimTimer, counter, setHi
                 RE_EXN_ID: "Assert_failure",
                 _1: [
                   "Demo_test.res",
-                  1338,
+                  1337,
                   8
                 ],
                 Error: new Error()
@@ -1473,7 +1472,7 @@ function randomWeighted(blockTypeWeights) {
           RE_EXN_ID: "Assert_failure",
           _1: [
             "Demo_test.res",
-            1415,
+            1414,
             52
           ],
           Error: new Error()
@@ -1573,7 +1572,7 @@ function getRandomBlockType2(currentLevel) {
         RE_EXN_ID: "Assert_failure",
         _1: [
           "Demo_test.res",
-          1446,
+          1445,
           12
         ],
         Error: new Error()
@@ -1769,7 +1768,7 @@ function worldRemove(world, body) {
   return Matter.World.remove(world, body);
 }
 
-function createLanes2(canvasWidth, canvasHeight, laneCount, blockCount, wallStartY, wallThickness, blockHeightRatio, setVerticalWallSegments, pushWalls, world, _getVerticalWallSegments, _bALL_RADIUS) {
+function createLanes2(canvasWidth, canvasHeight, laneCount, blockCount, wallStartY, wallThickness, blockHeightRatio, setVerticalWallSegments, pushWalls, world, getVerticalWallSegments) {
   var laneWidth = canvasWidth / laneCount;
   var blockHeight = (canvasHeight - wallStartY) / blockCount * blockHeightRatio;
   var newVerticalWallSegmentsArray = (Array(laneCount + 1).fill(null).map(() => Array(blockCount).fill(null).map(() => [])));
@@ -1798,7 +1797,7 @@ function createLanes2(canvasWidth, canvasHeight, laneCount, blockCount, wallStar
               }
             });
         wallSegment.label = "wall";
-        var row = _getVerticalWallSegments()[laneIndex];
+        var row = getVerticalWallSegments()[laneIndex];
         if (row !== undefined) {
           var blockSegments = row[blockIndex];
           if (blockSegments !== undefined) {
