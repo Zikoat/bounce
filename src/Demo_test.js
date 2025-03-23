@@ -1769,80 +1769,51 @@ function worldRemove(world, body) {
   return Matter.World.remove(world, body);
 }
 
-function createLanes2(
-        CANVAS_WIDTH, 
-        CANVAS_HEIGHT, 
-        LANE_COUNT, 
-        BLOCK_COUNT, 
-        WALL_START_Y, 
-        WALL_THICKNESS, 
-        BLOCK_HEIGHT_RATIO,
-        setVerticalWallSegments,
-        pushWalls, 
-        world,
-        getVerticalWallSegments,
-        BALL_RADIUS
-    )     {
-        const laneWidth = CANVAS_WIDTH / LANE_COUNT;
-        const blockHeight = (CANVAS_HEIGHT - WALL_START_Y) / BLOCK_COUNT * BLOCK_HEIGHT_RATIO;
-        setVerticalWallSegments( Array(LANE_COUNT + 1).fill(null).map(() => Array(BLOCK_COUNT).fill(null).map(() => [])))
-
-        for (let laneIndex = 0; laneIndex <= LANE_COUNT; laneIndex++) {
-            const x = laneWidth * laneIndex;
-            // Add walls from top of canvas to WALL_START_Y for the leftmost and rightmost lanes
-            if (laneIndex === 0 || laneIndex === LANE_COUNT) {
-                // Calculate the height of the top wall section
-                const topWallHeight = WALL_START_Y;
-                const topWallY = topWallHeight / 2; // Center point of the wall
-                const topWall = Bodies.rectangle(x, topWallY, WALL_THICKNESS, topWallHeight, {
-                    isStatic: true,
-                    render: {
-                        fillStyle: '#95a5a6'
-                    }
-                });
-                topWall.label = 'wall';
-                pushWalls(topWall);
-                World.add(world, topWall);
+function createLanes2(canvasWidth, canvasHeight, laneCount, blockCount, wallStartY, wallThickness, blockHeightRatio, setVerticalWallSegments, pushWalls, world, _getVerticalWallSegments, _bALL_RADIUS) {
+  var laneWidth = canvasWidth / laneCount;
+  var blockHeight = (canvasHeight - wallStartY) / blockCount * blockHeightRatio;
+  var newVerticalWallSegmentsArray = (Array(laneCount + 1).fill(null).map(() => Array(blockCount).fill(null).map(() => [])));
+  setVerticalWallSegments(newVerticalWallSegmentsArray);
+  for(var laneIndex = 0; laneIndex <= laneCount; ++laneIndex){
+    var x = laneWidth * laneIndex;
+    if (laneIndex === 0 || laneIndex === laneCount) {
+      var topWallY = wallStartY / 2;
+      var topWall = Matter.Bodies.rectangle(x, topWallY, wallThickness, wallStartY, {
+            isStatic: true,
+            render: {
+              fillStyle: "#95a5a6"
             }
-            for (let blockIndex = 0; blockIndex < BLOCK_COUNT; blockIndex++) {
-                // Skip creating wall segment with medium probability (45%)
-                // But always keep walls on the outer edges
-                if ((laneIndex !== 0 && laneIndex !== LANE_COUNT) && Math.random() < 0.45) {
-                    continue;
-                }
-                const y = WALL_START_Y + (blockHeight * blockIndex) + (blockHeight / 2);
-                const wallSegment = Bodies.rectangle(x, y, WALL_THICKNESS, blockHeight, {
-                    isStatic: true,
-                    render: {
-                        fillStyle: '#95a5a6'
-                    }
-                });
-                wallSegment.label = 'wall';
-                const blockSegments = getVerticalWallSegments()[laneIndex]?.[blockIndex];
-                if (blockSegments) {
-                    blockSegments.push(wallSegment);
-                    pushWalls(wallSegment);
-                    World.add(world, wallSegment);
-                }
-            }
-            // Add bottom wall extensions
-            if (laneIndex === 0 || laneIndex === LANE_COUNT) {
-                const extraWallHeight = BALL_RADIUS * 3;
-                const extraWallY = CANVAS_HEIGHT + (extraWallHeight / 3);
-                const sideWallExtension = Bodies.rectangle(x, extraWallY, WALL_THICKNESS, extraWallHeight, {
-                    isStatic: true,
-                    render: {
-                        fillStyle: '#95a5a6',
-                        visible: false
-                    }
-                });
-                sideWallExtension.label = 'wall';
-                pushWalls(sideWallExtension);
-                World.add(world, sideWallExtension);
-            }
-        }
+          });
+      topWall.label = "wall";
+      pushWalls(topWall);
+      Matter.World.add(world, topWall);
     }
-;
+    for(var blockIndex = 0; blockIndex <= blockCount; ++blockIndex){
+      if (!(laneIndex !== 0 && laneIndex !== laneCount && Math.random() < 0.45)) {
+        var y = wallStartY + blockHeight * blockIndex + blockHeight / 2;
+        var wallSegment = Matter.Bodies.rectangle(x, y, wallThickness, blockHeight, {
+              isStatic: true,
+              render: {
+                fillStyle: "#95a5a6"
+              }
+            });
+        wallSegment.label = "wall";
+        var row = _getVerticalWallSegments()[laneIndex];
+        if (row !== undefined) {
+          var blockSegments = row[blockIndex];
+          if (blockSegments !== undefined) {
+            blockSegments.push(wallSegment);
+            pushWalls(wallSegment);
+            Matter.World.add(world, wallSegment);
+          }
+          
+        }
+        
+      }
+      
+    }
+  }
+}
 
 if (typeof window === "object") {
   window.onload = (function () {
@@ -1866,5 +1837,6 @@ export {
   lineSegmentIntersectsRibbon2 ,
   drawChevronForBlock2 ,
   worldRemove ,
+  createLanes2 ,
 }
 /*  Not a pure module */

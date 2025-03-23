@@ -2,13 +2,12 @@ type world
 type composite
 type constraintType
 type mouseConstraint
-type body =  Body | Composite | Constraint | MouseConstraint
 
 @val external create: {..} => world = "Matter.World.create"
 
-@val external add: (world, body) => world = "Matter.World.add"
+@val external add: (world, Bodies.body) => world = "Matter.World.add"
 
-@val external addBody: (world, body) => world = "Matter.World.addBody"
+@val external addBody: (world, Bodies.body) => world = "Matter.World.addBody"
 
 @val external addComposite: (world, composite) => world = "Matter.World.addComposite"
 
@@ -16,4 +15,4 @@ type body =  Body | Composite | Constraint | MouseConstraint
 
 @val external clear: (world, bool) => unit = "Matter.World.clear"
 
-@val external remove: (world, body) => world = "Matter.World.remove" 
+@val external remove: (world, Bodies.body) => world = "Matter.World.remove"

@@ -1747,81 +1747,93 @@ let worldRemove = (world, body) => {
   World.remove(world, body)
 }
 
-%%raw(`
-function createLanes2(
-        CANVAS_WIDTH, 
-        CANVAS_HEIGHT, 
-        LANE_COUNT, 
-        BLOCK_COUNT, 
-        WALL_START_Y, 
-        WALL_THICKNESS, 
-        BLOCK_HEIGHT_RATIO,
-        setVerticalWallSegments,
-        pushWalls, 
-        world,
-        getVerticalWallSegments,
-        BALL_RADIUS
-    )     {
-        const laneWidth = CANVAS_WIDTH / LANE_COUNT;
-        const blockHeight = (CANVAS_HEIGHT - WALL_START_Y) / BLOCK_COUNT * BLOCK_HEIGHT_RATIO;
-        setVerticalWallSegments( Array(LANE_COUNT + 1).fill(null).map(() => Array(BLOCK_COUNT).fill(null).map(() => [])))
+let createLanes2 = (
+  canvasWidth,
+  canvasHeight,
+  laneCount: int,
+  blockCount: int,
+  wallStartY,
+  wallThickness,
+  blockHeightRatio,
+  setVerticalWallSegments,
+  pushWalls,
+  world,
+  _getVerticalWallSegments: unit => array<array<array<Bodies.body>>>,
+  _bALL_RADIUS,
+) => {
+  let laneWidth: float = canvasWidth /. (laneCount :> float)
+  let blockHeight: float = (canvasHeight -. wallStartY) /. (blockCount :> float) *. blockHeightRatio
+  // fuuuuck, no idea why this one doesnt work when transformed to Array.make calls.
+  let newVerticalWallSegmentsArray = %raw(`Array(laneCount + 1).fill(null).map(() => Array(blockCount).fill(null).map(() => []))`)
+  setVerticalWallSegments(newVerticalWallSegmentsArray)
 
-        for (let laneIndex = 0; laneIndex <= LANE_COUNT; laneIndex++) {
-            const x = laneWidth * laneIndex;
-            // Add walls from top of canvas to WALL_START_Y for the leftmost and rightmost lanes
-            if (laneIndex === 0 || laneIndex === LANE_COUNT) {
-                // Calculate the height of the top wall section
-                const topWallHeight = WALL_START_Y;
-                const topWallY = topWallHeight / 2; // Center point of the wall
-                const topWall = Bodies.rectangle(x, topWallY, WALL_THICKNESS, topWallHeight, {
-                    isStatic: true,
-                    render: {
-                        fillStyle: '#95a5a6'
-                    }
-                });
-                topWall.label = 'wall';
-                pushWalls(topWall);
-                World.add(world, topWall);
-            }
-            for (let blockIndex = 0; blockIndex < BLOCK_COUNT; blockIndex++) {
-                // Skip creating wall segment with medium probability (45%)
-                // But always keep walls on the outer edges
-                if ((laneIndex !== 0 && laneIndex !== LANE_COUNT) && Math.random() < 0.45) {
-                    continue;
-                }
-                const y = WALL_START_Y + (blockHeight * blockIndex) + (blockHeight / 2);
-                const wallSegment = Bodies.rectangle(x, y, WALL_THICKNESS, blockHeight, {
-                    isStatic: true,
-                    render: {
-                        fillStyle: '#95a5a6'
-                    }
-                });
-                wallSegment.label = 'wall';
-                const blockSegments = getVerticalWallSegments()[laneIndex]?.[blockIndex];
-                if (blockSegments) {
-                    blockSegments.push(wallSegment);
-                    pushWalls(wallSegment);
-                    World.add(world, wallSegment);
-                }
-            }
-            // Add bottom wall extensions
-            if (laneIndex === 0 || laneIndex === LANE_COUNT) {
-                const extraWallHeight = BALL_RADIUS * 3;
-                const extraWallY = CANVAS_HEIGHT + (extraWallHeight / 3);
-                const sideWallExtension = Bodies.rectangle(x, extraWallY, WALL_THICKNESS, extraWallHeight, {
-                    isStatic: true,
-                    render: {
-                        fillStyle: '#95a5a6',
-                        visible: false
-                    }
-                });
-                sideWallExtension.label = 'wall';
-                pushWalls(sideWallExtension);
-                World.add(world, sideWallExtension);
-            }
-        }
+  for laneIndex in 0 to laneCount {
+    let x: float = laneWidth *. (laneIndex :> float)
+
+    // Add walls from top of canvas to WALL_START_Y for the leftmost and rightmost lanes
+    if laneIndex === 0 || laneIndex === laneCount {
+      // Calculate the height of the top wall section
+      let topWallHeight: float = wallStartY
+      let topWallY: float = topWallHeight /. 2. // Center point of the wall
+      let topWall = Bodies.rectangle(
+        ~x,
+        ~y=topWallY,
+        ~width=wallThickness,
+        ~height=topWallHeight,
+        ~options={
+          isStatic: true,
+          render: {
+            fillStyle: "#95a5a6",
+          },
+        },
+        (),
+      )
+      topWall.label = "wall"
+      pushWalls(topWall)
+      let _ = World.add(world, topWall)
     }
-`)
+    for blockIndex in 0 to blockCount {
+      // Skip creating wall segment with medium probability (45%)
+      // But always keep walls on the outer edges
+      switch laneIndex !== 0 && laneIndex !== laneCount && Math.random() < 0.45 {
+      | true => ()
+      | false => {
+          let y: float = wallStartY +. blockHeight *. (blockIndex :> float) +. blockHeight /. 2.
+          let wallSegment = Bodies.rectangle(
+            ~x,
+            ~y,
+            ~width=wallThickness,
+            ~height=blockHeight,
+            ~options={
+              isStatic: true,
+              render: {
+                fillStyle: "#95a5a6",
+              },
+            },
+            (),
+          )
+          wallSegment.label = "wall"
+
+          let row = _getVerticalWallSegments()[laneIndex]
+          switch row {
+          | Some(row) => {
+              let blockSegments = row[blockIndex]
+              switch blockSegments {
+              | Some(blockSegments) => {
+                  blockSegments->Array.push(wallSegment)
+                  pushWalls(wallSegment)
+                  let _ = World.add(world, wallSegment)
+                }
+              | None => ()
+              }
+            }
+          | None => ()
+          }
+        }
+      }
+    }
+  }
+}
 
 // ---------------------------------------------
 
